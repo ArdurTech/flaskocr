@@ -45,9 +45,10 @@ jobs:
           aws elasticbeanstalk create-application-version \
             --application-name ardurtechno \
             --version-label ${{ github.sha }} \
-            --source-bundle S3Bucket=my-s3-bucket,S3Key=source.zip
-
+            --source-bundle S3Bucket=my-s3-bucket,S3Key=source.zip \
+            --region ${{ env.AWS_REGION }}
           aws elasticbeanstalk update-environment \
             --application-name ardurtechno \
             --environment-name Ardurtechno-env \
-            --version-label ${{ github.sha }}
+            --version-label ${{ github.sha }} \
+            --region ${{ env.AWS_REGION }}
