@@ -1,0 +1,53 @@
+name: Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main  # Change this to the branch you want to trigger the deployment on
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ardurflask:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/ardurflask:latest
+
+      - name: Install AWS CLI
+        run: |
+          pip install --upgrade awscli
+
+      - name: Deploy to Elastic Beanstalk
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-south-1  # Change this to your desired region
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name ardurtechno \
+            --version-label ${{ github.sha }} \
+            --source-bundle S3Bucket=my-s3-bucket,S3Key=source.zip
+
+          aws elasticbeanstalk update-environment \
+            --application-name ardurtechno \
+            --environment-name Ardurtechno-env \
+            --version-label ${{ github.sha }}
