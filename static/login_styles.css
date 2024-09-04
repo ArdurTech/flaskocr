@@ -1,0 +1,74 @@
+/* Login Page Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: url('../static/logo/back.jpg') no-repeat center center fixed; 
+    background-size: cover; /* Ensure the image covers the entire background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0); /* Slightly opaque background for better readability */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0);
+    opacity: 1;
+
+}
+.login-container img {
+    margin-bottom: 10px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    background: linear-gradient(145deg, #e0dcdc, #bdbde9ce); /* Subtle gradient for 3D effect */
+    color: #0e0000;
+    opacity: 0.7; /* Less opacity for placeholder */
+    transition: opacity 0.3s ease;
+}
+
+#companyLogo {
+    width: 250px;
+    height: auto;
+    margin-right: 20px;
+
+}
+.login-container input::placeholder {
+    color: #0a0707;
+    opacity: 1; /* Ensure placeholder text is fully visible */
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: #000000;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.login-container button {
+    padding: 10px 10px;
+    width: 104%;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #8d9192, #042183a8); /* Subtle gradient for 3D effect */
+    color: rgb(15, 0, 0);
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.login-container button:hover {
+    background: linear-gradient(145deg, #8d9192, #01061aa8); /* Hover effect */
+    transform: translateY(-2px);
+}

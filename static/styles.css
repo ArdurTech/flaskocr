@@ -1,0 +1,291 @@
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    background: url('../static/logo/back.jpg') no-repeat center center fixed; 
+    background-size: cover;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header styling */
+header {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 10px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.253);
+}
+
+/* Company logo in header */
+#companyLogo {
+    width: 200px;
+    height: auto;
+    margin-right: 20px;
+}
+
+/* Background blur effect */
+.blur-background {
+    position: relative;
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+
+/* Loading overlay */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: filter 0.3s ease;
+}
+
+/* Loading message and GIF container */
+#loadingOverlay div {
+    text-align: center;
+}
+
+/* Loading GIF */
+#loadingOverlay img {
+    width: 90px;
+    height: 80px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Loading text */
+#loadingOverlay p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1500px;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+/* Canvas container styling */
+#canvasContainer {
+    position: relative;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #f5f3f3, #ffffff);
+    box-shadow: 0 12px 24px #000000, inset 0 2px 4px rgb(255, 255, 255);
+    width: 48%;
+    height: 85vh;
+    max-width: 100%;
+    overflow: hidden; /* Ensure the image fits within the container */
+}
+
+/* Centered canvas with rounded corners */
+canvas {
+    display: block;
+    margin: auto;
+    border-radius: 15px;
+    width: 100%; /* Ensure the canvas takes up full width */
+    height: 100%; /* Ensure the canvas takes up full height */
+    object-fit: contain; /* Fit the image within the canvas without distortion */
+}
+
+
+/* Right text container styling */
+#rightTextContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 50%;
+    height: 81vh;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    box-shadow: 0 12px 24px rgb(0, 0, 0), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Extracted text area styling */
+#extractedText {
+    width: 100%;
+    min-height: 100%;
+    padding: 20px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    color: #333;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    resize: none;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+#browseButtonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.choose-file-button {
+    background-color: #008bcc9f;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+#fileName {
+    margin-left: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.choose-file-button:hover {
+    background: linear-gradient(145deg, #272727, #cff1cf);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(233, 210, 210, 0.2);
+}
+
+/* Footer controls (inputs and buttons) */
+.footer-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Inputs inside the footer controls */
+.footer-controls input {
+    padding: 10px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    color: #333;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    margin: 5px;
+}
+
+/* Placeholder styling for inputs */
+.footer-controls input::placeholder {
+    color: #888;
+}
+
+/* Focus effect for inputs */
+.footer-controls input:focus {
+    outline: none;
+    box-shadow: 0 0 8px #333;
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+}
+
+/* Hover effect for inputs */
+.footer-controls input:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer controls buttons */
+.footer-controls button {
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #fdfbf5, #64646460);
+    color: rgb(15, 0, 0);
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+.footer-controls button:hover {
+    background: linear-gradient(145deg, #272727, #cff1cf);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(233, 210, 210, 0.2);
+}
+
+/* Logout button styling */
+.logout-button {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff00;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.logout-button img, .logout-button i {
+    margin-right: 5px;
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Popup overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+/* Popup content styling */
+.popup-content {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Buttons inside the popup */
+.popup-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.popup-button:hover {
+    background: linear-gradient(145deg, #e0e0e0, #f0f0f0);
+    transform: translateY(-2px);
+}
+
+.popup-button:focus {
+    outline: none;
+    box-shadow: 0 0 8px #333;
+}
+
