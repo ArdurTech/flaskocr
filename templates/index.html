@@ -4,15 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArdurTech</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">     
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='logo/ardur.png') }}" alt="Ardur Technologies" id="companyLogo" style="width: 150px; height: 25px;">
-        <button id="logoutButton" class="logout-button">
-            <img src="{{ url_for('static', filename='logo/logout.png') }}" alt="Logout" id="logout-button" style="width: 30px; height: 25px;">
-        </button>
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='logo/ArdurTech.png') }}" alt="Ardur Technologies" id="companyLogo">
+        </div>
+        <div class="header-right">
+            <div class="dropdown">
+                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+                <span id="username">{{ username }}</span>
+                <div class="dropdown-content">
+                    <p>{{ username }}</p>
+                    <button id="logoutButton" class="logout-button">Logout</button>
+                </div>
+            </div>
+        </div>
     </header>
+    
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
@@ -224,6 +234,23 @@
             // Hide the logout confirmation popup
             document.getElementById('logoutConfirmation').style.display = 'none';
         });
+
+        document.querySelector('.dropdown').addEventListener('click', function() {
+            this.querySelector('.dropdown-content').classList.toggle('show');
+        });
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('#username')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        };
 
         function redrawCanvas() {
             const leftCanvas = document.getElementById('leftCanvas');
