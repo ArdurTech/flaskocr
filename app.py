@@ -8,6 +8,7 @@ import base64
 import tempfile
 import re
 from functools import wraps
+from functools import wraps
 import bcrypt
 from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user
 
@@ -110,6 +111,28 @@ def register():
 
     return render_template('register.html', username_exists=username_exists, username=request.form.get('username'))
 
+def create_user(username, password):
+    # Check if username already exists
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT username FROM user WHERE username = %s", (username,))
+    existing_user = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if existing_user:
+        return False  # User already exists
+
+    # Create hashed password and insert into the database
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO user (username, password_hash) VALUES (%s, %s)", (username, hashed))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return True
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -128,8 +151,13 @@ def login():
 
 @app.route('/logout')
 def logout():
+
     session.pop('logged_in')
     session.pop('username')
+    session.pop('logged_in')
+    session.pop('username')
+    session.pop('logged_in', None)
+    session.pop('username', None)
     return redirect(url_for('login'))
 
 @app.route('/')
@@ -139,6 +167,7 @@ def index():
     if username is None:
         flash('Please log in first.')
         return redirect(url_for('login'))  # Ensure redirection if username is None
+    username = session.get('username')  # Retrieve username from session or database
     return render_template('index.html', username=username)
 
 @app.route('/upload', methods=['POST'])
