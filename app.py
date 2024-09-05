@@ -7,10 +7,8 @@ from pdf2image import convert_from_path
 import base64
 import tempfile
 import re
-<<<<<<< HEAD
 from functools import wraps
-=======
->>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
+from functools import wraps
 import bcrypt
 from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user
 
@@ -67,7 +65,6 @@ def handle_file_upload(file):
             return image, extract_text_from_image(image)
     return None, "Unsupported file format"
 
-<<<<<<< HEAD
 def create_user(username, password):
     # Check if username already exists
     connection = get_db_connection()
@@ -90,8 +87,6 @@ def create_user(username, password):
     connection.close()
     return True
 
-=======
->>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     username_exists = False
@@ -116,8 +111,6 @@ def register():
 
     return render_template('register.html', username_exists=username_exists, username=request.form.get('username'))
 
-<<<<<<< HEAD
-=======
 def create_user(username, password):
     # Check if username already exists
     connection = get_db_connection()
@@ -140,7 +133,6 @@ def create_user(username, password):
     connection.close()
     return True
 
->>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -159,26 +151,23 @@ def login():
 
 @app.route('/logout')
 def logout():
-<<<<<<< HEAD
+
     session.pop('logged_in')
     session.pop('username')
-=======
+    session.pop('logged_in')
+    session.pop('username')
     session.pop('logged_in', None)
     session.pop('username', None)
->>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     return redirect(url_for('login'))
 
 @app.route('/')
 @login_required
 def index():
-<<<<<<< HEAD
     username = session.get('username')
     if username is None:
         flash('Please log in first.')
         return redirect(url_for('login'))  # Ensure redirection if username is None
-=======
     username = session.get('username')  # Retrieve username from session or database
->>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     return render_template('index.html', username=username)
 
 @app.route('/upload', methods=['POST'])
