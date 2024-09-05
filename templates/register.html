@@ -30,11 +30,6 @@
                 required>
             {% if username_exists %}
                 <p class="error-message">User with the same Username already exists!</p>
-            {% if username_exists %}
-                <p class="error-message">User with the same Username already exists!</p>
-            <input type="text" name="username" placeholder="Username" class="{{ 'error' if username_exists }}" required value="{{ request.form.get('username') }}">
-            {% if username_exists %}
-                <p class="error-message">User with same Username already exists !</p>
             {% endif %}
             <input type="password" name="password" placeholder="Password" required>
             <input type="password" name="confirm_password" placeholder="Confirm Password" required>
@@ -45,7 +40,6 @@
             <a href="{{ url_for('login') }}" class="register-button">Login</a>
         </div>
     </div>
-
     <script>
     document.querySelector('form').addEventListener('submit', function(e) {
         const password = document.querySelector('input[name="password"]').value;
