@@ -216,7 +216,6 @@ canvas {
     border-radius: 15px;
     width: 100%;
     height: 100%;
-    object-fit: contain;
 }
 
 /* Right text container styling */
@@ -285,7 +284,7 @@ canvas {
     border-radius: 15px;
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
     color: #333;
-    font-size: 18px;
+    font-size: 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     margin: 5px;
@@ -314,9 +313,9 @@ canvas {
     padding: 10px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(145deg, #fdfbf5, #64646460);
+    background: linear-gradient(145deg, #54a38b, #eecfcf60);
     color: rgb(15, 0, 0);
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;

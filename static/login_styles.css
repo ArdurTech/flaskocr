@@ -10,6 +10,12 @@ body {
     margin: 0;
 }
 
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
 .login-container {
     display: flex;
     flex-direction: column;
@@ -46,13 +52,16 @@ body {
 
 }
 .login-container input::placeholder {
-    color: #0a0707;
+    text-align: center;
+    color: #0b0136;
+    font-size: large;
     opacity: 1; /* Ensure placeholder text is fully visible */
 }
 
 .login-container input:focus {
     outline: none;
     border-color: #000000;
+    text-align: center;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.849);
 }
 
@@ -61,7 +70,7 @@ body {
     width: 104%;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(145deg, #8d9192, #042183a8); /* Subtle gradient for 3D effect */
+    background: linear-gradient(145deg, #af7abd, #042183a8); /* Subtle gradient for 3D effect */
     font-size: 16px;
     color: #ffffff;
     cursor: pointer;
@@ -75,7 +84,6 @@ body {
 }
 
 .register-container {
-    margin-top: 20px;
     text-align: center;
 }
 
@@ -85,7 +93,7 @@ body {
     margin-top: 10px;
     font-size: 16px;
     color: #ffffff;
-    background: linear-gradient(145deg, #8d9192, #042183a8);
+    background: linear-gradient(145deg, #af7abd, #042183a8);
     text-decoration: none;
     border-radius: 5px;
     border: none;
