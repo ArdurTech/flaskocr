@@ -1,17 +1,17 @@
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for
+from flask import Flask, flash, render_template, request, jsonify, redirect, session, url_for
 import cv2
 import numpy as np
+import pymysql
 import pytesseract
 from pdf2image import convert_from_path
 import base64
 import tempfile
 import re
-from database import create_database_and_table, insert_data
-import os
-import shutil
+import bcrypt
+from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user
 
 app = Flask(__name__)
-app.secret_key = 'secret_key' 
+app.secret_key = 'secret_key'
 
 # MySQL configurations
 app.config['MYSQL_HOST'] = 'database-1.czew08qiqixz.ap-south-1.rds.amazonaws.com'
@@ -55,15 +55,62 @@ def handle_file_upload(file):
             return image, extract_text_from_image(image)
     return None, "Unsupported file format"
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    username_exists = False
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not username or not password or not confirm_password:
+            flash('All fields are required.')
+            return render_template('register.html', username_exists=username_exists, username=username)
+
+        if password != confirm_password:
+            flash('Passwords do not match.')
+            return render_template('register.html', username_exists=username_exists, username=username)
+
+        if create_user(username, password):
+            flash('Registration successful! You can now log in.')
+            return redirect(url_for('login'))
+
+        username_exists = True
+
+    return render_template('register.html', username_exists=username_exists, username=request.form.get('username'))
+
+def create_user(username, password):
+    # Check if username already exists
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT username FROM user WHERE username = %s", (username,))
+    existing_user = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if existing_user:
+        return False  # User already exists
+
+    # Create hashed password and insert into the database
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO user (username, password_hash) VALUES (%s, %s)", (username, hashed))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return True
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Simple hardcoded credentials check (for demonstration)
-        if username == 'admin' and password == 'password':
+        user = get_user_by_username(username)
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
             session['logged_in'] = True
+            session['username'] = username  # Store the username in the session
             return redirect(url_for('index'))  # Redirect to the main app after successful login
         else:
             return render_template('login.html', error='Invalid credentials')
@@ -73,13 +120,13 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('username', None)
     return redirect(url_for('login'))
 
 @app.route('/')
 def index():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('index.html')
+    username = session.get('username')  # Retrieve username from session or database
+    return render_template('index.html', username=username)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -94,14 +141,14 @@ def upload_file():
     return jsonify({
         'image': image_base64,
         'text': text,
-        'filepath': file.filename  # Send the filepath back to the client
+        'filepath': file.filename
     })
 
 def clean_text(text):
     # Remove specific unwanted patterns or words
     text = re.sub(r'Vv', 'V', text)
     text = re.sub(r'Bewember', 'December', text)
-    text = re.sub(r'DAMPABAS', 'Lampasas', text)# Example specific replacement
+    text = re.sub(r'DAMPABAS', 'Lampasas', text)
     text = re.sub(r'|', '', text)
     text = re.sub(r'__', '', text)  # Remove double underscores
     text = re.sub(r'eeeny', '', text)
@@ -112,24 +159,13 @@ def clean_text(text):
     text = re.sub(r'wee', '', text)
     text = re.sub(r'eee', '', text)
     text = re.sub(r'Btock', 'Block', text)
-    
-    
-    # Remove unwanted symbols and characters, keeping only specific punctuation and alphanumeric characters
     text = re.sub(r'[^\w\s.,?!()_~]', '', text)
-    
-    # Add spacing between lines
     lines = text.splitlines()
     spaced_text = '\n\n'.join(line.strip() for line in lines if line.strip())
-    
-    # Properly format dates if they exist
     spaced_text = re.sub(r'(\d{1,2}/\d{1,2}/\d{4})', r'\1\n', spaced_text)
-    
-    # Handle paragraphs by ensuring there's spacing between them
     paragraphs = re.split(r'\n\s*\n', spaced_text)
     formatted_text = '\n\n'.join(paragraph.strip() for paragraph in paragraphs if paragraph.strip())
-    
     return formatted_text
-
 
 @app.route('/submit', methods=['POST'])
 def submit_data():
@@ -145,4 +181,4 @@ def submit_data():
     return jsonify({'success': True})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)

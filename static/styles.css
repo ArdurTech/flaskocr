@@ -1,9 +1,9 @@
 /* General body styling */
 body {
     font-family: Arial, sans-serif;
-    background: url('../static/logo/back.jpg') no-repeat center center fixed; 
+    background: url('../static/logo/back2.jpg') no-repeat center center fixed; 
     background-size: cover;
-    color: #000000;
+    color: #0a0101;
     margin: 0;
     padding: 0;
     display: flex;
@@ -14,20 +14,137 @@ body {
 /* Header styling */
 header {
     display: flex;
-    justify-content: start;
+    justify-content: space-between;
     align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #dad3d370, #2b8bc236);
+    box-shadow: 0 2px 4px rgba(3, 3, 3, 0.726);
     width: 100%;
-    background-color: #ffffff;
-    padding: 10px;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.253);
+    box-sizing: border-box;
 }
 
-/* Company logo in header */
-#companyLogo {
-    width: 200px;
-    height: auto;
-    margin-right: 20px;
+/* Left section of the header */
+.header-left {
+    display: flex;
+    align-items: center;
 }
+
+#companyLogo {
+    width: 150px;
+    height: auto;
+}
+
+/* User icon in header */
+#userIcon {
+    width: 30px; /* Adjust size as needed */
+    height: 30px; /* Adjust size as needed */
+    border-radius: 50%; /* Makes the icon circular */
+    margin-right: 8px; /* Spacing between icon and username */
+    vertical-align: middle; /* Aligns icon with text */
+}
+
+#userlogo{
+    width: 30px;
+    height: 27px;
+}
+
+/* Right section of the header */
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Dropdown styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+#username {
+    font-weight: bold;
+    padding: 8px 12px;
+    font-size: 15px;
+    color: #000000; /* White text color for contrast */
+    background-color: #ffffff; /* Brand blue background */
+    border-radius: 20px; /* Fully rounded corners for a pill-shaped appearance */
+    text-transform: uppercase; /* Uppercase text for a bold statement */
+    letter-spacing: 1px; /* Slight spacing between letters for a clean look */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Stronger shadow for emphasis */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transform on hover */
+}
+
+#username:hover {
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+    background-color: #b0d1f5; /* Darker blue on hover */
+    cursor: pointer; /* Pointer cursor to indicate interactivity */
+}
+
+/* Dropdown content styling */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #fafafae7;
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    overflow: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.dropdown-content.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dropdown-content p {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    margin: 0;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-content p:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.dropdown-content .logout-button {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #07270bda, #2b8ac2); /* Gradient background */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 0 0 8px 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 16px;
+    text-align: center;
+}
+
+.dropdown-content .logout-button:hover {
+    background-color: #b71c1c69; /* Darker red */
+    transform: scale(1.05); /* Slight scale effect */
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
 
 /* Background blur effect */
 .blur-background {
@@ -56,7 +173,6 @@ header {
     text-align: center;
 }
 
-/* Loading GIF */
 #loadingOverlay img {
     width: 90px;
     height: 80px;
@@ -64,7 +180,6 @@ header {
     margin: 0 auto;
 }
 
-/* Loading text */
 #loadingOverlay p {
     font-size: 24px;
     font-weight: bold;
@@ -91,7 +206,7 @@ header {
     width: 48%;
     height: 85vh;
     max-width: 100%;
-    overflow: hidden; /* Ensure the image fits within the container */
+    overflow: hidden;
 }
 
 /* Centered canvas with rounded corners */
@@ -99,11 +214,10 @@ canvas {
     display: block;
     margin: auto;
     border-radius: 15px;
-    width: 100%; /* Ensure the canvas takes up full width */
-    height: 100%; /* Ensure the canvas takes up full height */
-    object-fit: contain; /* Fit the image within the canvas without distortion */
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
-
 
 /* Right text container styling */
 #rightTextContainer {
@@ -113,7 +227,7 @@ canvas {
     width: 50%;
     height: 81vh;
     border-radius: 15px;
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    background: linear-gradient(145deg, #ffffff, #ffffffc9);
     box-shadow: 0 12px 24px rgb(0, 0, 0), inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -123,7 +237,7 @@ canvas {
     min-height: 100%;
     padding: 20px;
     border-radius: 15px;
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    background: linear-gradient(145deg, #ffffff, #ffffff);
     color: #333;
     font-size: 16px;
     font-family: Arial, sans-serif;
@@ -146,12 +260,6 @@ canvas {
     cursor: pointer;
     border-radius: 5px;
     font-size: 12px;
-}
-
-#fileName {
-    margin-left: 15px;
-    font-size: 16px;
-    color: #333;
 }
 
 .choose-file-button:hover {
@@ -177,7 +285,7 @@ canvas {
     border-radius: 15px;
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
     color: #333;
-    font-size: 14px;
+    font-size: 18px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     margin: 5px;
@@ -222,26 +330,6 @@ canvas {
     box-shadow: 0 6px 12px rgba(233, 210, 210, 0.2);
 }
 
-/* Logout button styling */
-.logout-button {
-    position: absolute;
-    right: 10px;
-    display: flex;
-    align-items: center;
-    background-color: #ffffff00;
-    border: none;
-    padding: 12px;
-    cursor: pointer;
-}
-
-.logout-button img, .logout-button i {
-    margin-right: 5px;
-}
-
-.logout-button:hover {
-    transform: translateY(-2px);
-}
-
 /* Popup overlay */
 .popup-overlay {
     position: fixed;
@@ -276,16 +364,24 @@ canvas {
     cursor: pointer;
     margin: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
 }
 
 .popup-button:hover {
     background: linear-gradient(145deg, #e0e0e0, #f0f0f0);
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.popup-button:focus {
-    outline: none;
-    box-shadow: 0 0 8px #333;
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
 }
 
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
