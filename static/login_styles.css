@@ -10,6 +10,12 @@ body {
     margin: 0;
 }
 
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
 .login-container {
     display: flex;
     flex-direction: column;
@@ -36,6 +42,7 @@ body {
     color: #0e0000;
     opacity: 0.7; /* Less opacity for placeholder */
     transition: opacity 0.3s ease;
+    box-shadow: 0 0 8px rgb(0, 0, 3);
 }
 
 #companyLogo {
@@ -45,14 +52,17 @@ body {
 
 }
 .login-container input::placeholder {
-    color: #0a0707;
+    text-align: center;
+    color: #0b0136;
+    font-size: large;
     opacity: 1; /* Ensure placeholder text is fully visible */
 }
 
 .login-container input:focus {
     outline: none;
     border-color: #000000;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.849);
 }
 
 .login-container button {
@@ -60,15 +70,39 @@ body {
     width: 104%;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(145deg, #8d9192, #042183a8); /* Subtle gradient for 3D effect */
-    color: rgb(15, 0, 0);
+    background: linear-gradient(145deg, #af7abd, #042183a8); /* Subtle gradient for 3D effect */
     font-size: 16px;
+    color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgb(0, 0, 0);
     transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .login-container button:hover {
+    background: linear-gradient(145deg, #8d9192, #01061aa8); /* Hover effect */
+    transform: translateY(-2px);
+}
+
+.register-container {
+    text-align: center;
+}
+
+.register-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #ffffff;
+    background: linear-gradient(145deg, #af7abd, #042183a8);
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.986);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.register-button:hover {
     background: linear-gradient(145deg, #8d9192, #01061aa8); /* Hover effect */
     transform: translateY(-2px);
 }
