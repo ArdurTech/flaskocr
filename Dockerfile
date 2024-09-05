@@ -27,7 +27,8 @@ RUN pip install --no-cache-dir \
     opencv-python==4.10.0.84 \
     opencv-python-headless==4.10.0.84 \
     pdf2image==1.17.0 \
-    pytesseract==0.3.10
+    pytesseract==0.3.10 \
+    bcrypt==4.2.0
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000

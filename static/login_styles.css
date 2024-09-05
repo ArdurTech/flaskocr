@@ -61,7 +61,10 @@ body {
 .login-container input:focus {
     outline: none;
     border-color: #000000;
+<<<<<<< HEAD
     text-align: center;
+=======
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.849);
 }
 
@@ -70,7 +73,11 @@ body {
     width: 104%;
     border: none;
     border-radius: 10px;
+<<<<<<< HEAD
     background: linear-gradient(145deg, #af7abd, #042183a8); /* Subtle gradient for 3D effect */
+=======
+    background: linear-gradient(145deg, #8d9192, #042183a8); /* Subtle gradient for 3D effect */
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     font-size: 16px;
     color: #ffffff;
     cursor: pointer;
@@ -84,6 +91,10 @@ body {
 }
 
 .register-container {
+<<<<<<< HEAD
+=======
+    margin-top: 20px;
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     text-align: center;
 }
 
@@ -93,7 +104,11 @@ body {
     margin-top: 10px;
     font-size: 16px;
     color: #ffffff;
+<<<<<<< HEAD
     background: linear-gradient(145deg, #af7abd, #042183a8);
+=======
+    background: linear-gradient(145deg, #8d9192, #042183a8);
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
     text-decoration: none;
     border-radius: 5px;
     border: none;

@@ -19,6 +19,7 @@
     <div class="login-container">
         <img src="{{ url_for('static', filename='logo/ardur1.png') }}" alt="Ardur Technologies" id="companyLogo">
         <form action="{{ url_for('register') }}" method="post">
+<<<<<<< HEAD
             <input 
                 type="text" 
                 name="username" 
@@ -30,6 +31,11 @@
                 required>
             {% if username_exists %}
                 <p class="error-message">User with the same Username already exists!</p>
+=======
+            <input type="text" name="username" placeholder="Username" class="{{ 'error' if username_exists }}" required value="{{ request.form.get('username') }}">
+            {% if username_exists %}
+                <p class="error-message">User with same Username already exists !</p>
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
             {% endif %}
             <input type="password" name="password" placeholder="Password" required>
             <input type="password" name="confirm_password" placeholder="Confirm Password" required>
@@ -40,6 +46,7 @@
             <a href="{{ url_for('login') }}" class="register-button">Login</a>
         </div>
     </div>
+<<<<<<< HEAD
     <script>
     document.querySelector('form').addEventListener('submit', function(e) {
         const password = document.querySelector('input[name="password"]').value;
@@ -51,5 +58,7 @@
         }
     });
 </script>
+=======
+>>>>>>> e33f909d056401d15e2e4e590ed182d7a0755ccc
 </body>
 </html>
