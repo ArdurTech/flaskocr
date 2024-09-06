@@ -16,7 +16,7 @@
                 <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
                 <span id="username">{{ username }}</span>
                 <div class="dropdown-content">
-                    <p>{{ username }}</p>
+                    <button id="reviewButton" class="dropdown-button">DataEntry Report</button>
                     <button id="logoutButton" class="logout-button">Logout</button>
                 </div>
             </div>
@@ -139,50 +139,54 @@
         });
 
         document.getElementById('submitButton').addEventListener('click', function() {
-            const inputs = document.querySelectorAll('input[type="text"]');
-            const extractedText = document.getElementById('extractedText').value;
-            const formData = new FormData();
+        const inputs = document.querySelectorAll('input[type="text"]');
+        const extractedText = document.getElementById('extractedText').value;
+        const formData = new FormData();
 
-            inputs.forEach((input, index) => {
-                formData.append(`input${index + 1}`, input.value);
-            });
-
-            formData.append('extractedText', extractedText);
-            formData.append('filename', 'default_filename'); // If you want to set a default filename
-            formData.append('filepath', filepath); // Add the stored filepath
-
-            fetch('/submit', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Data submitted successfully');
-
-                    // Clear all fields and containers after successful submission
-                    inputs.forEach(input => input.value = '');
-                    document.getElementById('extractedText').value = '';
-                    document.getElementById('fileInput').value = '';
-                    document.getElementById('fileName').textContent = 'No file selected'; // Reset file name display
-                    const leftCanvas = document.getElementById('leftCanvas');
-                    const ctxLeft = leftCanvas.getContext('2d');
-                    ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
-
-                    // Keep the browse button visible
-                    document.getElementById('browseButtonWrapper').style.display = 'flex';
-
-                    // Disable the submit button
-                    document.getElementById('submitButton').disabled = true;
-                } else if (data.error) {
-                    alert(data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error submitting data');
-            });
+        inputs.forEach((input, index) => {
+            formData.append(`input${index + 1}`, input.value);
         });
+
+        formData.append('extractedText', extractedText);
+        formData.append('filename', 'default_filename'); // If you want to set a default filename
+        formData.append('filepath', filepath); // Add the stored filepath
+
+        fetch('/submit', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Data submitted successfully');
+
+                // Clear all fields and containers after successful submission
+                inputs.forEach(input => input.value = '');
+                document.getElementById('extractedText').value = '';
+                document.getElementById('fileInput').value = '';
+                document.getElementById('fileName').textContent = 'No file selected'; // Reset file name display
+                const leftCanvas = document.getElementById('leftCanvas');
+                const ctxLeft = leftCanvas.getContext('2d');
+                ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
+
+                // Clear the image reference to prevent redrawing
+                imageObj = null; // Reset the image object
+                filepath = ''; // Clear the filepath reference
+
+                // Keep the browse button visible
+                document.getElementById('browseButtonWrapper').style.display = 'flex';
+
+                // Disable the submit button
+                document.getElementById('submitButton').disabled = true;
+            } else if (data.error) {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error submitting data');
+        });
+    });
 
         function checkInputsFilled() {
             const inputs = document.querySelectorAll('input[type="text"]');
@@ -233,6 +237,10 @@
         document.getElementById('cancelLogoutButton').addEventListener('click', function() {
             // Hide the logout confirmation popup
             document.getElementById('logoutConfirmation').style.display = 'none';
+        });
+
+        document.getElementById('reviewButton').addEventListener('click', function() {
+            window.location.href = "{{ url_for('review') }}";
         });
 
         document.querySelector('.dropdown').addEventListener('click', function() {

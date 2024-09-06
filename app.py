@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, flash, render_template, request, jsonify, redirect, session, url_for
 import cv2
 import numpy as np
@@ -162,6 +163,7 @@ def clean_text(text):
     text = re.sub(r'Vv', 'V', text)
     text = re.sub(r'Bewember', 'December', text)
     text = re.sub(r'DAMPABAS', 'Lampasas', text)
+    text = re.sub(r'Sohn', 'John', text)
     text = re.sub(r'|', '', text)
     text = re.sub(r'__', '', text)  # Remove double underscores
     text = re.sub(r'eeeny', '', text)
@@ -171,7 +173,7 @@ def clean_text(text):
     text = re.sub(r'ccccccccscsceessseets', '', text)
     text = re.sub(r'wee', '', text)
     text = re.sub(r'eee', '', text)
-    text = re.sub(r'Btock', 'Block', text)
+    text = re.sub(r'Btock', 'Block', text) 
     text = re.sub(r'[^\w\s.,?!()_~]', '', text)
     lines = text.splitlines()
     spaced_text = '\n\n'.join(line.strip() for line in lines if line.strip())
@@ -181,17 +183,55 @@ def clean_text(text):
     return formatted_text
 
 @app.route('/submit', methods=['POST'])
+@login_required  # Ensure the user is logged in
 def submit_data():
+    username = session.get('username')  # Retrieve username from session
     inputs = [request.form.get(f'input{i+1}') for i in range(5)]
     extracted_text = request.form.get('extractedText')
-    filepath = request.form.get('filepath')
+    filename = request.form.get('filepath')
 
-    if any(not field for field in inputs + [extracted_text, filepath]):
+    if any(not field for field in inputs + [extracted_text, filename]):
         return jsonify({'success': False, 'error': 'All fields must be filled.'})
 
-    insert_data(filepath, inputs, extracted_text)
+    # Insert data into the database, including username and created time
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        INSERT INTO ocrdata (username, filename, input1, input2, input3, input4, input5, extracted_text)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """, (username, filename, *inputs, extracted_text))
+    connection.commit()
+    cursor.close()
+    connection.close()
 
     return jsonify({'success': True})
+
+@app.route('/review')
+def review():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('review.html', username=session['username'])
+
+@app.route('/get_submissions')
+def get_submissions():
+    if 'username' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    username = session['username']
+    today = datetime.date.today().strftime('%Y-%m-%d')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    query = '''
+        SELECT filename, input1, input2, input3, input4, input5, created_time
+        FROM ocrdata
+        WHERE username = %s AND DATE(created_time) = %s
+    '''
+    cursor.execute(query, (username, today))
+    submissions = cursor.fetchall()
+    conn.close()
+
+    return jsonify({'submissions': submissions})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
