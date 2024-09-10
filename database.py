@@ -40,13 +40,16 @@ def create_database_and_table():
         )
     """)
     
+    # Create table if it doesn't exist
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) UNIQUE,
-            password_hash VARCHAR(255)
+            password_hash VARCHAR(255),
+            role VARCHAR(50)
         )
     """)
+
     
     connection.commit()
     cursor.close()
@@ -74,13 +77,13 @@ def get_user_by_username(username):
     connection.close()
     return user
 
-def create_user(username, password):
+def create_user(username, password, role):
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     connection = get_db_connection()
     cursor = connection.cursor()
 
     try:
-        cursor.execute("INSERT INTO user (username, password_hash) VALUES (%s, %s)", (username, hashed.decode('utf-8')))
+        cursor.execute("INSERT INTO user (username, password_hash, role) VALUES (%s, %s, %s)", (username, hashed.decode('utf-8'), role))
         connection.commit()
     except pymysql.MySQLError as e:
         print(f"Error: {e}")

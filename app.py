@@ -14,6 +14,8 @@ from database import create_database_and_table, get_db_connection, insert_data, 
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
+# app.permanent_session_lifetime = datetime.timedelta(minutes=10)
+
 
 # MySQL configurations
 app.config['MYSQL_HOST'] = 'database-1.czew08qiqixz.ap-south-1.rds.amazonaws.com'
@@ -65,7 +67,7 @@ def handle_file_upload(file):
             return image, extract_text_from_image(image)
     return None, "Unsupported file format"
 
-def create_user(username, password):
+def create_user(username, password, role):
     # Check if username already exists
     connection = get_db_connection()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -81,11 +83,17 @@ def create_user(username, password):
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     connection = get_db_connection()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO user (username, password_hash) VALUES (%s, %s)", (username, hashed))
+    cursor.execute("INSERT INTO user (username, password_hash, role) VALUES (%s, %s, %s)", (username, hashed, role))
     connection.commit()
     cursor.close()
     connection.close()
     return True
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Pass username to the template if needed
+    return render_template('dashboard.html', username=session.get('username'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -94,20 +102,30 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
+        role = request.form.get('role')  # Capture role from the form
 
-        if not username or not password or not confirm_password:
-            flash('All fields are required.')
+        # Ensure all fields are filled
+        if not username or not password or not confirm_password or not role:
+            flash('All fields, including role, are required.')
             return render_template('register.html', username_exists=username_exists, username=username)
 
+        # Check if passwords match
         if password != confirm_password:
             flash('Passwords do not match.')
             return render_template('register.html', username_exists=username_exists, username=username)
 
-        if create_user(username, password):
-            flash('Registration successful! You can now log in.')
-            return redirect(url_for('login'))
+        # Check if the username already exists
+        existing_user = get_user_by_username(username)  # Assuming this function checks for an existing user
+        if existing_user:
+            username_exists = True
+            flash('Username already exists. Please choose a different username.')
+            return render_template('register.html', username_exists=username_exists, username=username)
 
-        username_exists = True
+        # If the username is new, create the user with the selected role
+        create_user(username, password, role)
+
+        flash('Registration successful! You can now log in.')
+        return redirect(url_for('login'))
 
     return render_template('register.html', username_exists=username_exists, username=request.form.get('username'))
 
@@ -121,7 +139,7 @@ def login():
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
             session['logged_in'] = True
             session['username'] = username  # Store the username in the session
-            return redirect(url_for('index'))  # Redirect to the main app after successful login
+            return redirect(url_for('dashboard'))  # Redirect to the main app after successful login
         else:
             return render_template('login.html', error='Invalid credentials')
 
@@ -218,16 +236,28 @@ def get_submissions():
         return jsonify({'error': 'User not logged in'}), 401
 
     username = session['username']
-    today = datetime.date.today().strftime('%Y-%m-%d')
+    date = request.args.get('date')
+
+    if date:
+        try:
+            # Ensure the date format is correct
+            formatted_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+    else:
+        # Default to today's date if no date is provided
+        formatted_date = datetime.date.today()
 
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
     query = '''
         SELECT filename, input1, input2, input3, input4, input5, created_time
         FROM ocrdata
         WHERE username = %s AND DATE(created_time) = %s
     '''
-    cursor.execute(query, (username, today))
+    
+    cursor.execute(query, (username, formatted_date))
     submissions = cursor.fetchall()
     conn.close()
 

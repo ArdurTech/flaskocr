@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
+*{ 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Karla', sans-serif;
+} 
+
 /* Login Page Styles */
 body {
     font-family: Arial, sans-serif;
@@ -8,6 +16,44 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+}
+
+/* General styling for select dropdown */
+.login-container select {
+    appearance: none; /* Remove default dropdown arrow for more control */
+    background: linear-gradient(145deg, #e0dcdc, #bdbde9ce); /* Same gradient as input */
+    color: #0b0136;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    width: 100%;
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0 0 8px rgb(0, 0, 3);
+}
+
+/* Arrow for dropdown */
+.login-container select::-ms-expand {
+    display: none; /* Hide default arrow in IE */
+}
+
+.login-container select option {
+    background: linear-gradient(145deg, #e0dcdc, #bdbde9ce); /* Option background */
+    color: #0b0136; /* Text color */
+    padding: 10px; /* Padding for options */
+}
+
+/* Hover effect for options */
+.login-container select option:hover {
+    background-color: #ddd; /* Hover background color */
+}
+
+/* Styling the opened dropdown */
+.login-container select:focus {
+    border-color: #333; /* Border color on focus */
+    outline: none;
+    background: linear-gradient(145deg, #e0dcdc, #bdbde9ce); /* Background when opened */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.849); /* Focus shadow */
 }
 
 .error-message {
@@ -25,13 +71,13 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0);
     opacity: 1;
-
 }
+
 .login-container img {
     margin-bottom: 10px;
 }
 
-.login-container input {
+.login-container input, .login-container select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
@@ -49,16 +95,16 @@ body {
     width: 250px;
     height: auto;
     margin-right: 20px;
-
 }
-.login-container input::placeholder {
+
+.login-container input::placeholder, .login-container select {
     text-align: center;
     color: #0b0136;
     font-size: large;
     opacity: 1; /* Ensure placeholder text is fully visible */
 }
 
-.login-container input:focus {
+.login-container input:focus, .login-container select:focus {
     outline: none;
     border-color: #000000;
     text-align: center;
@@ -67,7 +113,7 @@ body {
 
 .login-container button {
     padding: 10px 10px;
-    width: 104%;
+    width: 100%;
     border: none;
     border-radius: 10px;
     background: linear-gradient(145deg, #af7abd, #042183a8); /* Subtle gradient for 3D effect */
@@ -84,13 +130,13 @@ body {
 }
 
 .register-container {
+    margin-top: 10px;
     text-align: center;
 }
 
 .register-button {
     display: inline-block;
     padding: 10px 20px;
-    margin-top: 10px;
     font-size: 16px;
     color: #ffffff;
     background: linear-gradient(145deg, #af7abd, #042183a8);

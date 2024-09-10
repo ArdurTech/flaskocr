@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
+*{ 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Karla', sans-serif;
+} 
+
 /* General body styling */
 body {
     font-family: Arial, sans-serif;
@@ -247,7 +255,7 @@ canvas {
     justify-content: center;
     align-items: flex-start;
     width: 50%;
-    height: 81vh;
+    height: 85vh;
     border-radius: 5px;
     background: linear-gradient(145deg, #ffffff, #ffffffc9);
     box-shadow: 0 12px 24px rgb(0, 0, 0), inset 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+        </div>
+    </header>
+
+    <div id="mainContent">
+        <div class="container" id="dataEntryContainer">
+            <button class="action-button" id="dataEntryButton">Data Entry</button>
+        </div>
+        <div class="container" id="qcContainer">
+            <button class="action-button" id="qcButton">QC</button>
+        </div>
+        <div class="container" id="leadContainer">
+            <button class="action-button" id="leadButton">Lead</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('dataEntryButton').addEventListener('click', function() {
+            window.location.href = "{{ url_for('index') }}"; // Redirect to index page
+        });
+
+        document.getElementById('qcButton').addEventListener('click', function() {
+            // Redirect to a different page or add functionality here
+            console.log("QC button clicked");
+        });
+
+        document.getElementById('leadButton').addEventListener('click', function() {
+            // Redirect to a different page or add functionality here
+            console.log("Lead button clicked");
+        });
+    </script>
+</body>
+</html>

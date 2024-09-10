@@ -1,5 +1,12 @@
-/* Review Page Styles */
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
+*{ 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Karla', sans-serif;
+} 
 
+/* Review Page Styles */
 body {
     font-family: Arial, sans-serif;
     background: url('../static/logo/back2.jpg') no-repeat center center fixed; 
@@ -34,7 +41,6 @@ header {
 
 h4{
     color: #ffffff;
-    
 }
 
 /* User icon in header */
@@ -175,43 +181,64 @@ h4{
     display: block;
 }
 
+
+/* Main content styling */
 #mainContent {
-    padding-left: 10px;
-    padding-right: 10px;
-    color: #000000;
-    font-size: large;
+    padding: 20px;
+    background: #ffffff00;
+    border-radius: 8px;
+    max-width: 1800px;
+    margin: 0 auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Date filter styling */
+#dateFilterContainer {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+#dateFilterLabel {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#dateFilterInput {
+    font-size: 16px;
+    padding: 8px;
+    border: 1px solid #fff8f8;
+    border-radius: 4px;
+}
+
+/* Total submissions count */
+#totalCountContainer {
+    margin-bottom: 20px;
+    color: #f4f4f4;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Table styling */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 table th, table td {
     padding: 10px;
-    text-align: center;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: #f4f4f4;
 }
 
 table th {
-    background-color: #9fadc7;
-    color: rgb(0, 0, 0);
-    
+    background-color: #f4f4f4;
+    color: #000;
+    font-weight: bold;
 }
 
-table tr:nth-child(even) {
-    background-color: #bfd7ee;
-}
-
-table tr:nth-child(odd) {
-    background-color: #d7e0e9;
-}
-table tr:hover {
-    background-color: #615e5c36;
-}
-
+/* Popup styling */
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -222,26 +249,27 @@ table tr:hover {
     display: none;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .popup-content {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .popup-button {
-    background-color: #4CAF50;
-    color: #fff;
+    background-color: #007bff;
+    color: white;
     border: none;
     padding: 10px 20px;
     margin: 5px;
-    border-radius: 4px;
     cursor: pointer;
+    border-radius: 4px;
 }
 
 .popup-button:hover {
-    background-color: #45a049;
+    background-color: #0056b3;
 }
