@@ -36,6 +36,21 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def role_required(allowed_roles):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'logged_in' not in session:
+                return redirect(url_for('login'))  # Redirect to login if not logged in
+            user_role = session.get('role')  # Get user role from session
+            if user_role not in allowed_roles:
+                flash('You do not have access to this page.')
+                return redirect(url_for('dashboard'))  # Redirect to dashboard if unauthorized
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+
+
 def preprocess_image(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     thresh = cv2.adaptiveThreshold(
@@ -95,6 +110,20 @@ def dashboard():
     # Pass username to the template if needed
     return render_template('dashboard.html', username=session.get('username'))
 
+@app.route('/qc')
+@login_required
+@role_required(['qc', 'lead'])  # Only QC and Lead roles can access the QC page
+def qc():
+    username = session.get('username')
+    return render_template('qc.html', username=username)
+
+@app.route('/lead')
+@login_required
+@role_required(['lead'])  # Only Lead role can access the Lead page
+def lead():
+    username = session.get('username')
+    return render_template('lead.html', username=username)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     username_exists = False
@@ -139,11 +168,13 @@ def login():
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
             session['logged_in'] = True
             session['username'] = username  # Store the username in the session
+            session['role'] = user['role']  # Store the user's role in the session
             return redirect(url_for('dashboard'))  # Redirect to the main app after successful login
         else:
             return render_template('login.html', error='Invalid credentials')
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -152,6 +183,7 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/')
+@role_required(['dataentry', 'qc', 'lead'])  # All roles can access the index page
 @login_required
 def index():
     username = session.get('username')
@@ -175,6 +207,23 @@ def upload_file():
         'text': text,
         'filepath': file.filename
     })
+    
+@app.route('/check_role_access/<role>', methods=['GET'])
+def check_role_access(role):
+    # Get the user's role from session
+    user_role = session.get('role')
+    
+    # Logic to check if the user has access based on role hierarchy
+    if role == 'dataentry' and user_role not in ['dataentry', 'qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Data Entry.'})
+    elif role == 'qc' and user_role not in ['qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access QC.'})
+    elif role == 'lead' and user_role != 'lead':
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Lead.'})
+
+    # If access is granted
+    return jsonify({'access': True})
+
 
 def clean_text(text):
     # Remove specific unwanted patterns or words

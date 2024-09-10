@@ -42,6 +42,10 @@ header {
     height: auto;
 }
 
+h4{
+    color: #ffffff;
+}
+
 /* User icon in header */
 #userIcon {
     width: 30px; /* Adjust size as needed */

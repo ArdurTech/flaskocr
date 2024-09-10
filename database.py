@@ -71,7 +71,7 @@ def insert_data(username, filename, inputs, extracted_text):
 def get_user_by_username(username):
     connection = get_db_connection()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT username, password_hash FROM user WHERE username = %s", (username,))
+    cursor.execute("SELECT username, password_hash, role FROM user WHERE username = %s", (username,))
     user = cursor.fetchone()
     cursor.close()
     connection.close()
