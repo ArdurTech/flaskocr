@@ -43,12 +43,12 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name ardurtechno \
+            --application-name titleindex \
             --version-label ${{ github.sha }} \
             --source-bundle S3Bucket=ardur,S3Key=deploy.zip \
             --region ${{ env.AWS_REGION }}
           aws elasticbeanstalk update-environment \
-            --application-name ardurtechno \
-            --environment-name Ardurtechno-env \
+            --application-name titleindex \
+            --environment-name Titleindex-env \
             --version-label ${{ github.sha }} \
             --region ${{ env.AWS_REGION }}
