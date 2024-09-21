@@ -21,7 +21,7 @@ import pymysql
 import pandas as pd
 import shutil
 from werkzeug.utils import secure_filename
-from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user, insert_legal_dat, insert_master_data, insert_party_data
+from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user, insert_legal_data, insert_master_data, insert_party_data
 import database
 
 app = Flask(__name__)
