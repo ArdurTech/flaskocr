@@ -312,7 +312,7 @@ canvas {
     top: 65px;
     width: 280px;
     height: 85%;
-    background-color: #f9f9f967; /* Adjust background color as needed */
+    background-color: #f9f9f900; /* Adjust background color as needed */
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0);
     padding: 20px;
     overflow-y: auto;
