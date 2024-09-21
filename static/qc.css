@@ -216,3 +216,98 @@ h4{
 .popup-button:hover {
     background-color: #0056b3;
 }
+
+/* Container for dropdowns */
+.dropdowns-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Space between dropdowns */
+    margin: 20px;
+}
+
+/* Style for individual dropdown selects */
+.dropdown-select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Styles for the file details section */
+#fileDetails {
+    display: none;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color: #ddd;
+    margin: 20px;
+    gap: 20px; /* Space between image and inputs */
+}
+
+.file-details-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.image-container {
+    max-height: 80vh; /* Fit the image to the viewport height */    
+    overflow: auto; /* Enable scrollbars if the image is too large */
+    position: relative; /* Allow absolute positioning for scroll */
+    width: 80%;
+}
+
+#fileImage {
+    display: block;
+    width: 100%; /* Fit the image width to the container */
+    height: auto; /* Maintain the aspect ratio */
+    border: 1px solid #ddd; /* Add a border for better visual separation */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for better depth */
+    object-fit: contain; /* Ensure the image maintains aspect ratio */
+}
+
+#fileInputs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Space between input fields */
+}
+
+#fileInputs label {
+    font-weight: bold;
+    color: #ddd;
+    margin-bottom: 4px; /* Space between label and input */
+}
+
+#fileInputs input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px; /* Slightly larger font for better readability */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle inset shadow */
+}
+
+#fileInputs input:focus {
+    border-color: #007bff; /* Highlight border on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Highlight shadow */
+}
+
+/* Styles for the Next button */
+#nextButton, #submitButton {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding for size */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-top: 20px; /* Space above the button */;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+#nextButton, #submitButton:hover {
+    background-color: #5d9960; /* Darker green on hover */
+}
+

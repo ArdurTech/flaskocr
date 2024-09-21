@@ -234,6 +234,7 @@ h4{
 
 /* Canvas container styling */
 #canvasContainer {
+    display: grid;
     position: relative;
     border-radius: 5px;
     background: linear-gradient(145deg, #f5f3f3, #ffffff);
@@ -241,7 +242,7 @@ h4{
     width: 48%;
     height: 85vh;
     max-width: 100%;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* Centered canvas with rounded corners */
@@ -280,9 +281,10 @@ canvas {
     overflow-y: auto;
 }
 
+
 #browseButtonWrapper {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: center;
 }
 
@@ -302,74 +304,118 @@ canvas {
     box-shadow: 0 6px 12px rgba(233, 210, 210, 0.2);
 }
 
-/* Footer controls (inputs and buttons) */
-.footer-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+/* Style for the side navigation */
+/* Styling for the sideNav container */
+#sideNav {
+    position: fixed;
+    right: 1px;
+    top: 65px;
+    width: 280px;
+    height: 85%;
+    background-color: #f9f9f967; /* Adjust background color as needed */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1; /* Ensure it's above other content */
+    transition: width 0.3s ease-in-out;
+}
+
+/* Input fields styling */
+#sideNav input[type="text"] {
     width: 100%;
-}
-
-/* Inputs inside the footer controls */
-.footer-controls input {
     padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
-    color: #333;
-    font-size: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    margin: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #000000;
+    background-color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Placeholder styling for inputs */
-.footer-controls input::placeholder {
-    color: #888;
-}
-
-/* Focus effect for inputs */
-.footer-controls input:focus {
+/* Input focus effect */
+#sideNav input[type="text"]:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
     outline: none;
-    box-shadow: 0 0 8px #333;
-    background: linear-gradient(145deg, #f0f0f0, #ffffff);
 }
 
-/* Hover effect for inputs */
-.footer-controls input:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Footer controls buttons */
-.footer-controls button {
+/* Submit button styling */
+#sideNav #submitButton {
+    width: 95%;
     padding: 10px;
+    background-color: #2599db; /* Disabled color */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: auto; 
+    transition: background-color 0.3s ease;
+}
+
+
+/* Prevent the canvas or main content from overlapping with the side nav */
+#mainContent {
+    margin-right: 260px; /* Leave space for the fixed side nav */
+    transition: margin-right 0.3s ease-in-out;
+}
+
+.button-group {
+    position: sticky; /* Stick to the top */
+    top: 0; /* Distance from the top */
+    background: rgba(255, 255, 255, 0); /* Background color for visibility */
+    z-index: 10; /* Keep it on top of other content */
+    padding: 10px; /* Add some padding */
+}
+
+/* Button styles */
+.button-group button {
+    background-color: #007BFF; /* Primary color */
+    color: white;
     border: none;
     border-radius: 5px;
-    background: linear-gradient(135deg, #0056b3, #8dbef1);
-    color: rgb(15, 0, 0);
-    font-size: 18px;
+    padding: 10px 15px;
+    margin: 5px 0;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    display: inline-block;
-    text-align: center;
-    height: 40px;
-    width: 100px;
-    margin-top: 5px;
+    transition: background-color 0.3s;
 }
 
-.footer-controls button:disabled{
-    background-color: #fffdfd;
-    cursor: not-allowed;
+.button-group button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+.input-fields-container {
+    height: calc(100vh - 50px); /* Adjust based on button height */
+    overflow-y: auto; /* Allow vertical scrolling */
+    padding: 10px; /* Optional padding */
 }
 
-.footer-controls button:hover {
-    background: linear-gradient(145deg, #91b1bb, #135c9b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(233, 210, 210, 0.2);
+.input-fields {
+    margin-bottom: 20px; /* Space between fields */
+}
+
+
+/* Input field styles */
+.input-fields input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* For smaller screens, make the sideNav responsive */
+@media (max-width: 768px) {
+    #sideNav {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: none;
+    }
+
+    #mainContent {
+        margin-right: 0;
+    }
 }
 
 /* Popup overlay */
@@ -422,4 +468,22 @@ canvas {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #888;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Adjust spacing as needed */
+}
+
+.add-button {
+    margin-left: 5px; /* Space between input and button */
+    border-radius: 0%;
+    background: transparent; /* No background */
+    color: #f5f3f3; /* Text color */
+    border: none; /* No border */
+    padding: 0; /* No padding */
+    cursor: pointer; /* Pointer on hover */
+    font-size: inherit; /* Inherit font size */
+    outline: none; /* Remove outline */
 }

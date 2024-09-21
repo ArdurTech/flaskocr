@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArdurTech</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">     
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
     <header>
         <div class="header-left">
@@ -23,7 +25,6 @@
             </div>
         </div>
     </header>
-    
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
@@ -42,10 +43,10 @@
         </div>
     </div>
 
+    <!-- Main Content -->
     <div id="mainContent">
         <div class="container">
             <div id="canvasContainer">
-                <!-- Always Visible Browse Button and File Name -->
                 <div id="browseButtonWrapper">
                     <label for="fileInput" class="choose-file-button">Browse</label>
                     <span id="fileName">No file selected</span>
@@ -58,221 +59,376 @@
             </div>
         </div>
 
-        <div class="footer-controls">
-            <input type="text" placeholder="Input 1">
-            <input type="text" placeholder="Input 2">
-            <input type="text" placeholder="Input 3">
-            <input type="text" placeholder="Input 4">
-            <input type="text" placeholder="Input 5">
-            <button type="button" id="submitButton" disabled>Submit</button>
-        </div>
-    </div>
+        <div id="sideNav">
+            <div class="button-group">
+                <button type="button" id="partyButton" onclick="showFields('party')">Party</button>
+                <button type="button" id="legalButton" onclick="showFields('legal')">Legal</button>
+                <button type="button" id="masterButton" onclick="showFields('master')">Master</button>
+                <button type="button" id="submitButton">Submit</button>
+            </div>
 
-    <script>
-        let scale = 1;
-        let originX = 0;
-        let originY = 0;
-        let isDragging = false;
-        let lastX, lastY;
-        let imgWidth, imgHeight;
-        let imageObj;
-        let filepath = ''; // To store the file path
+            <div class="input-fields-container">
+            <div id="partyFields" class="input-fields" style="display: none;">
+                <div class="input-container">
+                    <input type="text" id="grantor" placeholder="Grantor">
+                    <button type="button" class="add-button" onclick="addInputField('party', 'grantor')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="grantee" placeholder="Grantee">
+                    <button type="button" class="add-button" onclick="addInputField('party', 'grantee')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="comment" placeholder="Comment">
+                    <button type="button" class="add-button" onclick="addInputField('party', 'comment')">+</button>
+                </div>
+            </div>
+            
+            <div id="legalFields" class="input-fields" style="display: none;">
+                <div class="input-container">
+                    <input type="text" id="subdivision" placeholder="Subdivision">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'subdivision')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="platnum" placeholder="Platnum">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'platnum')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="lot" placeholder="LOT">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'lot')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="block" placeholder="BLOCK">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'block')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="section" placeholder="SECTION">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'section')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="abstractName" placeholder="ABSTRACT_NAME">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'abstractName')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="abstSvy" placeholder="Abst_svy">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'abstSvy')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="acres" placeholder="Acres">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'acres')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="briefLegal" placeholder="Brief_legal">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'briefLegal')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="refDocs" placeholder="Ref_Docs">
+                    <button type="button" class="add-button" onclick="addInputField('legal', 'refDocs')">+</button>
+                </div>
+            </div>
+        
+            <div id="masterFields" class="input-fields" style="display: none;">
+                <div class="input-container">
+                    <input type="text" id="bookType" placeholder="Book_type">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'bookType')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="instrumentType" placeholder="Instrument_type">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'instrumentType')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="remarks" placeholder="Remarks">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'remarks')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="instNo" placeholder="Inst. No.">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'instNo')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="caseNo" placeholder="Case_no.">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'caseNo')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="volume" placeholder="Volume">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'volume')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="page" placeholder="Page">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'page')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="instrumentDate" placeholder="Instrument Date">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'instrumentDate')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="fillingDate" placeholder="Filling Date">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'fillingDate')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="consideration" placeholder="Consideration">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'consideration')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="userComment" placeholder="User Comment">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'userComment')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="instType" placeholder="Inst Type">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'instType')">+</button>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="recordType" placeholder="Record type">
+                    <button type="button" class="add-button" onclick="addInputField('master', 'recordType')">+</button>
+                </div>
+            </div>
+            </div>
+        
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            // Show loading overlay and blur the background
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            document.getElementById('mainContent').classList.add('blur-background');
+        <script>
+            let scale = 1;
+            let originX = 0;
+            let originY = 0;
+            let isDragging = false;
+            let lastX, lastY;
+            let imgWidth, imgHeight;
+            let imageObj;
+            let filepath = '';
 
-            const file = event.target.files[0];
-            const formData = new FormData();
-            formData.append('file', file);
+            function addInputField(section, id) {
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'input-container';
+            
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = document.getElementById(id).placeholder;
 
-            // Update file name display
-            document.getElementById('fileName').textContent = file.name;
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.className = 'add-button';
+            addButton.textContent = '+';
+            addButton.onclick = function() {
+                addInputField(section, id);
+            };
 
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide loading overlay and remove blur
-                document.getElementById('loadingOverlay').style.display = 'none';
-                document.getElementById('mainContent').classList.remove('blur-background');
+            inputContainer.appendChild(newInput);
+            inputContainer.appendChild(addButton);
 
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    const leftCanvas = document.getElementById('leftCanvas');
-                    const ctxLeft = leftCanvas.getContext('2d');
-                    imageObj = new Image();
+            document.getElementById(`${section}Fields`).appendChild(inputContainer);
 
-                    imageObj.onload = function() {
-                        imgWidth = imageObj.width;
-                        imgHeight = imageObj.height;
-                        leftCanvas.width = imgWidth;
-                        leftCanvas.height = imgHeight;
-                        ctxLeft.drawImage(imageObj, 0, 0);
-                    };
-                    imageObj.src = 'data:image/png;base64,' + data.image;
-                    document.getElementById('extractedText').value = data.text;
-                    filepath = data.filepath; // Store the filepath
+            // Add event listener for formatting on the new input field
+            newInput.addEventListener('input', function() {
+                const selectedText = window.getSelection().toString();
+                if (selectedText) {
+                    const cleanedText = selectedText.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
+                    const nameParts = cleanedText.split(/\s+/);
+
+                    if (nameParts.length >= 2) {
+                        const firstName = nameParts[0];
+                        const lastName = nameParts[nameParts.length - 1];
+                        const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+
+                        const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
+                        newInput.value = formattedName;
+                    } else {
+                        newInput.value = cleanedText; // Fallback
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error uploading file');
             });
-        });
+        }
 
-        document.getElementById('extractedText').addEventListener('mouseup', function() {
-            const selectedText = window.getSelection().toString();
-            if (selectedText.trim() !== '') {
-                const inputs = document.querySelectorAll('input[type="text"]');
-                for (const input of inputs) {
-                    if (!input.value) {
-                        input.value = selectedText.trim();
+
+        function showFields(section) {
+            document.querySelectorAll('.input-fields').forEach(div => div.style.display = 'none');
+            document.getElementById(`${section}Fields`).style.display = 'block';
+        }
+
+            document.getElementById('fileInput').addEventListener('change', function (event) {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.getElementById('mainContent').classList.add('blur-background');
+
+                const file = event.target.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+
+                document.getElementById('fileName').textContent = file.name;
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('extractedText').value = data.text;
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        document.getElementById('mainContent').classList.remove('blur-background');
+
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            const leftCanvas = document.getElementById('leftCanvas');
+                            const ctxLeft = leftCanvas.getContext('2d');
+                            imageObj = new Image();
+
+                            imageObj.onload = function () {
+                                imgWidth = imageObj.width;
+                                imgHeight = imageObj.height;
+                                leftCanvas.width = imgWidth;
+                                leftCanvas.height = imgHeight;
+                                ctxLeft.drawImage(imageObj, 0, 0);
+                            };
+                            imageObj.src = 'data:image/png;base64,' + data.image;
+                            filepath = data.filepath;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error uploading file');
+                    });
+            });
+
+            function showFields(type) {
+                document.querySelectorAll('.input-fields').forEach(function (fieldSet) {
+                    fieldSet.style.display = 'none';
+                });
+
+                if (type === 'party') {
+                    document.getElementById('partyFields').style.display = 'block';
+                } else if (type === 'legal') {
+                    document.getElementById('legalFields').style.display = 'block';
+                } else if (type === 'master') {
+                    document.getElementById('masterFields').style.display = 'block';
+                }
+
+                checkInputsFilled();
+            }
+
+            function checkInputsFilled() {
+                const inputs = document.querySelectorAll('#sideNav input[type="text"]');
+                let anyFieldFilled = false;
+
+                for (let input of inputs) {
+                    if (input.value) {
+                        anyFieldFilled = true;
                         break;
                     }
                 }
+
+                document.getElementById('submitButton').disabled = !anyFieldFilled;
             }
-            checkInputsFilled(); // Check if all inputs are filled
-        });
 
-        document.getElementById('submitButton').addEventListener('click', function() {
-        const inputs = document.querySelectorAll('input[type="text"]');
-        const extractedText = document.getElementById('extractedText').value;
-        const formData = new FormData();
+            document.getElementById('submitButton').addEventListener('click', function () {
+                const selectedSection = document.querySelector('#sideNav .input-fields[style*="display: block"]').id.replace('Fields', '');
+                const inputs = document.querySelectorAll(`#${selectedSection}Fields input[type="text"]`);
+                const data = {
+                    selectedSection: selectedSection,
+                    filePath: filepath,
+                    username: '{{ username }}'
+                };
 
-        inputs.forEach((input, index) => {
-            formData.append(`input${index + 1}`, input.value);
-        });
+                inputs.forEach(input => {
+                    data[input.id] = input.value;
+                });
 
-        formData.append('extractedText', extractedText);
-        formData.append('filename', 'default_filename'); // If you want to set a default filename
-        formData.append('filepath', filepath); // Add the stored filepath
+                fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Submission successful!');
+                            inputs.forEach(input => {
+                                input.value = '';
+                            });
+                            document.getElementById('submitButton').disabled = true;
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting data');
+                    });
+            });
+            document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
+            input.addEventListener('input', function() {
+                const selectedText = window.getSelection().toString();
+                if (selectedText && document.activeElement === document.getElementById('grantor')) {
+                    const cleanedText = selectedText.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
+                    const nameParts = cleanedText.split(/\s+/);
 
-        fetch('/submit', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Data submitted successfully');
+                    if (nameParts.length >= 2) {
+                        const firstName = nameParts[0];
+                        const lastName = nameParts[nameParts.length - 1];
+                        const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
 
-                // Clear all fields and containers after successful submission
-                inputs.forEach(input => input.value = '');
-                document.getElementById('extractedText').value = '';
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileName').textContent = 'No file selected'; // Reset file name display
-                const leftCanvas = document.getElementById('leftCanvas');
-                const ctxLeft = leftCanvas.getContext('2d');
-                ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
-
-                // Clear the image reference to prevent redrawing
-                imageObj = null; // Reset the image object
-                filepath = ''; // Clear the filepath reference
-
-                // Keep the browse button visible
-                document.getElementById('browseButtonWrapper').style.display = 'flex';
-
-                // Disable the submit button
-                document.getElementById('submitButton').disabled = true;
-            } else if (data.error) {
-                alert(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error submitting data');
-        });
-    });
-
-        function checkInputsFilled() {
-            const inputs = document.querySelectorAll('input[type="text"]');
-            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
-            document.getElementById('submitButton').disabled = !allFilled;
-        }
-
-        document.getElementById('leftCanvas').addEventListener('mousedown', function(event) {
-            isDragging = true;
-            lastX = event.offsetX;
-            lastY = event.offsetY;
-        });
-
-        document.getElementById('leftCanvas').addEventListener('mouseup', function() {
-            isDragging = false;
-        });
-
-        document.getElementById('leftCanvas').addEventListener('mousemove', function(event) {
-            if (isDragging) {
-                const dx = event.offsetX - lastX;
-                const dy = event.offsetY - lastY;
-                originX += dx;
-                originY += dy;
-                lastX = event.offsetX;
-                lastY = event.offsetY;
-                redrawCanvas();
-            }
-        });
-
-        document.getElementById('leftCanvas').addEventListener('wheel', function(event) {
-            event.preventDefault();
-            const scaleFactor = 0.1;
-            scale += event.deltaY < 0 ? scaleFactor : -scaleFactor;
-            scale = Math.max(0.1, Math.min(scale, 10));
-            redrawCanvas();
-        });
-
-        document.getElementById('logoutButton').addEventListener('click', function() {
-            // Show the logout confirmation popup
-            document.getElementById('logoutConfirmation').style.display = 'flex';
-        });
-
-        document.getElementById('confirmLogoutButton').addEventListener('click', function() {
-            // Redirect to logout URL
-            window.location.href = "{{ url_for('logout') }}";
-        });
-
-        document.getElementById('cancelLogoutButton').addEventListener('click', function() {
-            // Hide the logout confirmation popup
-            document.getElementById('logoutConfirmation').style.display = 'none';
-        });
-
-        document.getElementById('reviewButton').addEventListener('click', function() {
-            window.location.href = "{{ url_for('review') }}";
-        });
-
-        document.querySelector('.dropdown').addEventListener('click', function() {
-            this.querySelector('.dropdown-content').classList.toggle('show');
-        });
-
-        // Close the dropdown if the user clicks outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('#username')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
+                        const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
+                        input.value = formattedName;
+                    } else {
+                        input.value = cleanedText; // Fallback
                     }
                 }
-            }
-        };
+            });
+        });
 
-        function redrawCanvas() {
+            document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
+                input.addEventListener('input', checkInputsFilled);
+            });
+
+            document.getElementById('logoutButton').addEventListener('click', function () {
+                document.getElementById('logoutConfirmation').style.display = 'block';
+            });
+
+            document.getElementById('confirmLogoutButton').addEventListener('click', function () {
+                window.location.href = '/logout';
+            });
+            document.getElementById('cancelLogoutButton').addEventListener('click', function () {
+                document.getElementById('logoutConfirmation').style.display = 'none';
+            });
+
             const leftCanvas = document.getElementById('leftCanvas');
-            const ctxLeft = leftCanvas.getContext('2d');
-            ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
-            ctxLeft.save();
-            ctxLeft.translate(originX, originY);
-            ctxLeft.scale(scale, scale);
-            ctxLeft.drawImage(imageObj, 0, 0);
-            ctxLeft.restore();
-        }
+            leftCanvas.addEventListener('mousedown', function (e) {
+                isDragging = true;
+                lastX = e.offsetX;
+                lastY = e.offsetY;
+            });
 
-        
-    </script>
+            leftCanvas.addEventListener('mousemove', function (e) {
+                if (isDragging) {
+                    const dx = e.offsetX - lastX;
+                    const dy = e.offsetY - lastY;
+                    originX += dx;
+                    originY += dy;
+                    lastX = e.offsetX;
+                    lastY = e.offsetY;
+                    drawCanvas();
+                }
+            });
+
+            leftCanvas.addEventListener('mouseup', function () {
+                isDragging = false;
+            });
+
+            leftCanvas.addEventListener('mouseleave', function () {
+                isDragging = false;
+            });
+
+            leftCanvas.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                scale += e.deltaY * -0.001;
+                scale = Math.min(Math.max(0.5, scale), 4);
+                drawCanvas();
+            });
+
+            function drawCanvas() {
+                const ctxLeft = leftCanvas.getContext('2d');
+                ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
+                ctxLeft.drawImage(imageObj, originX, originY, imgWidth * scale, imgHeight * scale);
+            }
+        </script>
+    </div>
 </body>
+
 </html>

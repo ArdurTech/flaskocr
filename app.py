@@ -1,8 +1,15 @@
 import datetime
-from flask import Flask, flash, render_template, request, jsonify, redirect, session, url_for
+import os
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from io import BytesIO
+from flask import Flask, current_app, flash, render_template, request, jsonify, redirect, session, url_for, send_file
 import cv2
 import numpy as np
-import pymysql
 import pytesseract
 from pdf2image import convert_from_path
 import base64
@@ -10,19 +17,29 @@ import tempfile
 import re
 from functools import wraps
 import bcrypt
-from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user
+import pymysql
+import pandas as pd
+import shutil
+from werkzeug.utils import secure_filename
+from database import create_database_and_table, get_db_connection, insert_data, get_user_by_username, create_user, insert_legal_dat, insert_master_data, insert_party_data
+import database
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static/uploads/processed_files')
 # app.permanent_session_lifetime = datetime.timedelta(minutes=10)
-
+# Define a folder for saving processed files
+UPLOAD_FOLDER = 'static/uploads/processed_files'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # MySQL configurations
-app.config['MYSQL_HOST'] = 'database-1.czew08qiqixz.ap-south-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = 'Ardur311012'
+app.config['MYSQL_HOST'] = 'ardurtech.mysql.database.azure.com'
+app.config['MYSQL_USER'] = 'aditya'
+app.config['MYSQL_PASSWORD'] = 'Admin3110'
 app.config['MYSQL_DB'] = 'ocr_database'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_SSL_CA'] = 'cert/DigiCertGlobalRootCA.crt.pem'
 
 # Initialize the database and table
 with app.app_context():
@@ -50,7 +67,6 @@ def role_required(allowed_roles):
         return decorated_function
     return wrapper
 
-
 def preprocess_image(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     thresh = cv2.adaptiveThreshold(
@@ -66,6 +82,32 @@ def extract_text_from_image(image):
     custom_config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(preprocessed_image, config=custom_config)
     return clean_text(text)
+
+def clean_text(text):
+    # Remove specific unwanted patterns or words
+    text = re.sub(r'Vv', 'V', text)
+    text = re.sub(r'Bewember', 'December', text)
+    text = re.sub(r'DAMPABAS', 'Lampasas', text)
+    text = re.sub(r'Sohn', 'John', text)
+    text = re.sub(r'YThat', 'That', text)
+    text = re.sub(r'|', '', text)
+    text = re.sub(r'__', '', text)
+    text = re.sub(r'_', '', text)# Remove double underscores
+    text = re.sub(r'eeeny', '', text)
+    text = re.sub(r'r2csccr', '', text)
+    text = re.sub(r'ooo', '', text)
+    text = re.sub(r'acco.', '', text)
+    text = re.sub(r'ccccccccscsceessseets', '', text)
+    text = re.sub(r'wee', '', text)
+    text = re.sub(r'eee', '', text)
+    text = re.sub(r'Btock', 'Block', text) 
+    text = re.sub(r'[^\w\s.,?!()_~]', '', text)
+    lines = text.splitlines()
+    spaced_text = '\n\n'.join(line.strip() for line in lines if line.strip())
+    spaced_text = re.sub(r'(\d{1,2}/\d{1,2}/\d{4})', r'\1\n', spaced_text)
+    paragraphs = re.split(r'\n\s*\n', spaced_text)
+    formatted_text = '\n\n'.join(paragraph.strip() for paragraph in paragraphs if paragraph.strip())
+    return formatted_text
 
 def handle_file_upload(file):
     ext = file.filename.split('.')[-1].lower()
@@ -103,26 +145,6 @@ def create_user(username, password, role):
     cursor.close()
     connection.close()
     return True
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    # Pass username to the template if needed
-    return render_template('dashboard.html', username=session.get('username'))
-
-@app.route('/qc')
-@login_required
-@role_required(['qc', 'lead'])  # Only QC and Lead roles can access the QC page
-def qc():
-    username = session.get('username')
-    return render_template('qc.html', username=username)
-
-@app.route('/lead')
-@login_required
-@role_required(['lead'])  # Only Lead role can access the Lead page
-def lead():
-    username = session.get('username')
-    return render_template('lead.html', username=username)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -175,12 +197,64 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Pass username to the template if needed
+    return render_template('dashboard.html', username=session.get('username'))
 
-@app.route('/logout')
-def logout():
-    session.pop('logged_in')
-    session.pop('username')
-    return redirect(url_for('login'))
+@app.route('/check_role_access/<role>', methods=['GET'])
+def check_role_access(role):
+    # Get the user's role from session
+    user_role = session.get('role')
+    
+    # Logic to check if the user has access based on role hierarchy
+    if role == 'dataentry' and user_role not in ['dataentry', 'qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Data Entry.'})
+    elif role == 'qc' and user_role not in ['qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access QC.'})
+    elif role == 'lead' and user_role != 'lead':
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Lead.'})
+
+    # If access is granted
+    return jsonify({'access': True})
+
+@app.route('/qc')
+@login_required
+@role_required(['qc', 'lead'])  # Only QC and Lead roles can access the QC page
+def qc():
+    username = session.get('username')
+    return render_template('qc.html', username=username)
+
+@app.route('/lead')
+@login_required
+@role_required(['lead'])  # Only Lead role can access the Lead page
+def lead():
+    username = session.get('username')
+    return render_template('lead.html', username=username)
+
+@app.route('/finalreports')
+def final_reports():
+    if 'username' in session:
+        username = session['username']
+        connection = database.get_db_connection()
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        
+        # Fetch Final Reports data
+        cursor.execute("""
+            SELECT username, filename, input1, input2, input3, input4, input5, qc_check, qc_done_by, created_time, qc_submission_time
+            FROM ocrdata
+            WHERE qc_check = 'Yes'
+            ORDER BY created_time DESC
+        """)
+        reports = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return render_template('finalreports.html', username=username, reports=reports)
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/')
 @role_required(['dataentry', 'qc', 'lead'])  # All roles can access the index page
@@ -207,77 +281,241 @@ def upload_file():
         'text': text,
         'filepath': file.filename
     })
-    
-@app.route('/check_role_access/<role>', methods=['GET'])
-def check_role_access(role):
-    # Get the user's role from session
-    user_role = session.get('role')
-    
-    # Logic to check if the user has access based on role hierarchy
-    if role == 'dataentry' and user_role not in ['dataentry', 'qc', 'lead']:
-        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Data Entry.'})
-    elif role == 'qc' and user_role not in ['qc', 'lead']:
-        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access QC.'})
-    elif role == 'lead' and user_role != 'lead':
-        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Lead.'})
 
-    # If access is granted
-    return jsonify({'access': True})
+import logging
 
-
-def clean_text(text):
-    # Remove specific unwanted patterns or words
-    text = re.sub(r'Vv', 'V', text)
-    text = re.sub(r'Bewember', 'December', text)
-    text = re.sub(r'DAMPABAS', 'Lampasas', text)
-    text = re.sub(r'Sohn', 'John', text)
-    text = re.sub(r'|', '', text)
-    text = re.sub(r'__', '', text)  # Remove double underscores
-    text = re.sub(r'eeeny', '', text)
-    text = re.sub(r'r2csccr', '', text)
-    text = re.sub(r'ooo', '', text)
-    text = re.sub(r'acco.', '', text)
-    text = re.sub(r'ccccccccscsceessseets', '', text)
-    text = re.sub(r'wee', '', text)
-    text = re.sub(r'eee', '', text)
-    text = re.sub(r'Btock', 'Block', text) 
-    text = re.sub(r'[^\w\s.,?!()_~]', '', text)
-    lines = text.splitlines()
-    spaced_text = '\n\n'.join(line.strip() for line in lines if line.strip())
-    spaced_text = re.sub(r'(\d{1,2}/\d{1,2}/\d{4})', r'\1\n', spaced_text)
-    paragraphs = re.split(r'\n\s*\n', spaced_text)
-    formatted_text = '\n\n'.join(paragraph.strip() for paragraph in paragraphs if paragraph.strip())
-    return formatted_text
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/submit', methods=['POST'])
 @login_required  # Ensure the user is logged in
 def submit_data():
     username = session.get('username')  # Retrieve username from session
-    inputs = [request.form.get(f'input{i+1}') for i in range(5)]
-    extracted_text = request.form.get('extractedText')
-    filename = request.form.get('filepath')
+    print(f"User '{username}' is attempting to submit data.")
+    logging.info(f"User '{username}' is attempting to submit data.")
 
-    if any(not field for field in inputs + [extracted_text, filename]):
-        return jsonify({'success': False, 'error': 'All fields must be filled.'})
+    # Get the file path from the request
+    filename = request.json.get('filepath', 'test')  # Default to 'test' if not provided
+    print(f"Selected filename: {filename}")
+    logging.info(f"Selected filename: {filename}")
 
-    # Insert data into the database, including username and created time
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    cursor.execute("""
-        INSERT INTO ocrdata (username, filename, input1, input2, input3, input4, input5, extracted_text)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-    """, (username, filename, *inputs, extracted_text))
-    connection.commit()
-    cursor.close()
-    connection.close()
+    selected_section = request.json.get('selectedSection')  # Get the selected section
+    print(f"Selected section: {selected_section}")
+    logging.info(f"Selected section: {selected_section}")
 
-    return jsonify({'success': True})
+    # Prepare data for insertion based on the selected section
+    data = {
+        'username': username,
+        'filename': filename,
+    }
+
+    # Check for required inputs and add them to the data dictionary
+    if selected_section == 'party':
+        data.update({
+            'grantor': request.json.get('grantor'),
+            'grantee': request.json.get('grantee'),
+            'comment': request.json.get('comment')
+        })
+        print(f"Party data collected: {data}")
+        logging.info(f"Party data collected: {data}")
+
+    elif selected_section == 'legal':
+        data.update({
+            'subdivision': request.json.get('subdivision'),
+            'platnum': request.json.get('platnum'),
+            'lot': request.json.get('lot'),
+            'block': request.json.get('block'),
+            'section': request.json.get('section'),
+            'abstractName': request.json.get('abstractName'),
+            'abstSvy': request.json.get('abstSvy'),
+            'acres': request.json.get('acres'),
+            'briefLegal': request.json.get('briefLegal'),
+            'refDocs': request.json.get('refDocs')
+        })
+        print(f"Legal data collected: {data}")
+        logging.info(f"Legal data collected: {data}")
+
+    elif selected_section == 'master':
+        data.update({
+            'bookType': request.json.get('bookType'),
+            'instrumentType': request.json.get('instrumentType'),
+            'remarks': request.json.get('remarks'),
+            'instNo': request.json.get('instNo'),
+            'caseNo': request.json.get('caseNo'),
+            'volume': request.json.get('volume'),
+            'page': request.json.get('page'),
+            'instrumentDate': request.json.get('instrumentDate'),
+            'fillingDate': request.json.get('fillingDate'),
+            'consideration': request.json.get('consideration'),
+            'userComment': request.json.get('userComment'),
+            'instType': request.json.get('instType'),
+            'recordType': request.json.get('recordType')
+        })
+        print(f"Master data collected: {data}")
+        logging.info(f"Master data collected: {data}")
+
+    # Removed validation for required fields
+    # if not all(data.values()):
+    #     print("Not all fields are filled. Submission failed.")
+    #     logging.warning("Not all fields are filled. Submission failed.")
+    #     return jsonify({'success': False, 'error': 'All fields must be filled.'})
+
+    # Create a secure filename
+    safe_filename = secure_filename(filename) if filename else 'test'  # Use 'test' if filename is empty
+    print(f"Secure filename created: {safe_filename}")
+    logging.info(f"Secure filename created: {safe_filename}")
+
+    # Handle the image upload if applicable
+    image_data = request.json.get('imageData')  # Assuming the image is sent as base64
+    if image_data:
+        image_data = image_data.split(',')[1]  # Extract base64 data
+        image_bytes = base64.b64decode(image_data)
+
+        # Generate the final save path
+        save_path = os.path.join(UPLOAD_FOLDER, safe_filename)
+
+        # Save the file to the designated folder
+        with open(save_path, 'wb') as image_file:
+            image_file.write(image_bytes)
+        print(f"Image saved to: {save_path}")
+        logging.info(f"Image saved to: {save_path}")
+
+    # Insert data into the appropriate table based on the selected section
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        if selected_section == 'party':
+            cursor.execute("""
+                INSERT INTO party (username, filename, grantor, grantee, comment)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (username, safe_filename, data['grantor'], data['grantee'], data['comment']))
+            print("Party data inserted into the database.")
+            logging.info("Party data inserted into the database.")
+
+        elif selected_section == 'legal':
+            cursor.execute("""
+                INSERT INTO legal (username, filename, subdivision, platnum, lot, block, section, abstractName, abstSvy, acres, briefLegal, refDocs)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (username, safe_filename, data['subdivision'], data['platnum'], data['lot'], data['block'], data['section'], data['abstractName'], data['abstSvy'], data['acres'], data['briefLegal'], data['refDocs']))
+            print("Legal data inserted into the database.")
+            logging.info("Legal data inserted into the database.")
+
+        elif selected_section == 'master':
+            cursor.execute("""
+                INSERT INTO master (username, filename, bookType, instrumentType, remarks, instNo, caseNo, volume, page, instrumentDate, fillingDate, consideration, userComment, instType, recordType)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (username, safe_filename, data['bookType'], data['instrumentType'], data['remarks'], data['instNo'], data['caseNo'], data['volume'], data['page'], data['instrumentDate'], data['fillingDate'], data['consideration'], data['userComment'], data['instType'], data['recordType']))
+            print("Master data inserted into the database.")
+            logging.info("Master data inserted into the database.")
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        print("Data submission successful.")
+        logging.info("Data submission successful.")
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"Error during data submission: {e}")
+        logging.error(f"Error during data submission: {e}")
+        return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/review')
 def review():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('review.html', username=session['username'])
+
+@app.route('/submit_qc', methods=['POST'])
+@login_required
+@role_required(['qc', 'lead'])
+def submit_qc():
+    filename = request.form.get('filename')
+    username = session.get('username')
+
+    if filename and username:
+        try:
+            # Log received data
+            print(f'Received filename: {filename}, username: {username}')
+
+            # Update qc_check to 'Yes' and add QC submission time
+            connection = get_db_connection()
+            cursor = connection.cursor()
+            cursor.execute("""
+                UPDATE ocrdata 
+                SET qc_check = 'Yes', qc_done_by = %s, qc_submission_time = CURRENT_TIMESTAMP
+                WHERE filename = %s
+            """, (username, filename))
+            connection.commit()
+
+            # Move the file from 'uploaded' folder to 'qc' folder
+            uploaded_folder = os.path.join(app.root_path, 'static', 'uploads/processed_files')
+            qc_folder = os.path.join(app.root_path, 'static', 'qc')
+
+            source_file = os.path.join(uploaded_folder, filename)
+            target_file = os.path.join(qc_folder, filename)
+
+            if os.path.exists(source_file):
+                shutil.move(source_file, target_file)
+            else:
+                return jsonify({'success': False, 'message': 'File not found in uploaded folder.'})
+
+            # Fetch the next file for the same user with qc_check = 'No'
+            next_file = find_next_file_for_user(username)  # Placeholder function to find the next file
+
+            # Log successful operation
+            print(f'File processed successfully for user: {username}')
+
+            # Close cursor and connection
+            cursor.close()
+            connection.close()
+
+            return jsonify({'success': True, 'next_file': next_file})
+        except Exception as e:
+            print(f'Error during QC submission: {e}')
+            cursor.close()
+            connection.close()
+            return jsonify({'success': False, 'message': str(e)})
+    else:
+        print('Missing filename or username')
+        return jsonify({'success': False, 'message': 'Filename or username is missing.'})
+
+def find_next_file_for_user(username):
+    """Find the next file for the given user."""
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT filename FROM ocrdata WHERE username = %s AND qc_check = 'No' LIMIT 1", (username,))
+    next_file_row = cursor.fetchone()  # This returns a tuple
+    cursor.close()
+    connection.close()
+    
+    # Access the filename from the tuple
+    return next_file_row[0] if next_file_row else None
+
+@app.route('/qcreports')
+def qc_reports():
+    if 'username' in session:
+        username = session['username']
+        connection = database.get_db_connection()
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        
+        # Fetch QC reports data for the logged-in user
+        cursor.execute("""
+            SELECT username, filename, qc_check, qc_done_by, qc_submission_time 
+            FROM ocrdata
+            WHERE qc_done_by = %s
+            ORDER BY created_time DESC
+        """, (username,))
+        reports = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return render_template('qcreports.html', username=username, reports=reports)
+    else:
+        return redirect(url_for('login'))  # Redirect to login if user is not authenticated
 
 @app.route('/get_submissions')
 def get_submissions():
@@ -311,6 +549,227 @@ def get_submissions():
     conn.close()
 
     return jsonify({'submissions': submissions})
+
+@app.route('/get_ocr_users', methods=['GET'])
+@login_required
+@role_required(['qc', 'lead'])
+def get_ocr_users():
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT DISTINCT username FROM ocrdata")
+    users = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return jsonify({'users': [user['username'] for user in users]})
+
+@app.route('/get_uploaded_files')
+@login_required
+def get_uploaded_files():
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT DISTINCT filename FROM ocrdata")
+    files = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return jsonify({'files': files})
+
+@app.route('/get_files_by_user', methods=['GET'])
+@login_required
+@role_required(['qc', 'lead'])
+def get_files_by_user():
+    username = request.args.get('username')
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    
+    # Select files where qc_check is 'No'
+    cursor.execute("SELECT filename FROM ocrdata WHERE username = %s AND qc_check = 'No'", (username,))
+    files = cursor.fetchall()
+    
+    cursor.close()
+    connection.close()
+    
+    return jsonify({'files': [file['filename'] for file in files]})
+
+@app.route('/get_file_details')
+@login_required
+def get_file_details():
+    filename = request.args.get('filename')
+    if not filename:
+        return jsonify({'success': False, 'message': 'Filename not provided'})
+
+    connection = get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT filename, input1, input2, input3, input4, input5
+        FROM ocrdata
+        WHERE filename = %s
+    """, (filename,))
+    file_details = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if not file_details:
+        return jsonify({'success': False, 'message': 'File not found'})
+
+    # Path to the file
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Read and convert the image
+    try:
+        img = cv2.imread(file_path, cv2.IMREAD_COLOR)
+        if img is None:
+            return jsonify({'success': False, 'message': 'Failed to read image'}), 500
+        
+        # Convert the image to PNG format
+        _, buffer = cv2.imencode('.png', img)
+        image_base64 = base64.b64encode(buffer).decode('utf-8')
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+    # Return the image, input fields, and username
+    return jsonify({
+        'success': True,
+        'image': image_base64,
+        'input1': file_details['input1'],
+        'input2': file_details['input2'],
+        'input3': file_details['input3'],
+        'input4': file_details['input4'],
+        'input5': file_details['input5']
+    })
+
+@app.route('/download_csv')
+def download_csv():
+    connection = database.get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT username, filename, input1, input2, input3, input4, input5, qc_check, qc_done_by, created_time, qc_submission_time
+        FROM ocrdata
+        WHERE qc_check = 'Yes'
+        ORDER BY created_time DESC
+    """)
+    reports = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    df = pd.DataFrame(reports)
+    csv = df.to_csv(index=False)
+    return send_file(BytesIO(csv.encode()), download_name='final_reports.csv', as_attachment=True, mimetype='text/csv')
+
+
+@app.route('/download_excel')
+def download_excel():
+    connection = database.get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT username, filename, input1, input2, input3, input4, input5, qc_check, qc_done_by, created_time, qc_submission_time
+        FROM ocrdata
+        WHERE qc_check = 'Yes'
+        ORDER BY created_time DESC
+    """)
+    reports = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    df = pd.DataFrame(reports)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Final Reports')
+    output.seek(0)
+    return send_file(output, download_name='final_reports.xlsx', as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+@app.route('/download_pdf')
+def download_pdf():
+    # Fetch data from the database
+    connection = database.get_db_connection()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT username, filename, input1, input2, input3, input4, input5, qc_check, qc_done_by, created_time, qc_submission_time
+        FROM ocrdata
+        WHERE qc_check = 'Yes'
+        ORDER BY created_time DESC
+    """)
+    reports = cursor.fetchall()
+    cursor.close()
+    connection.close()
+
+    # Buffer to hold the PDF
+    pdf_buffer = BytesIO()
+
+    # PDF document setup (use landscape for more space)
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(letter))
+    elements = []
+
+    # Title
+    styles = getSampleStyleSheet()
+    title_style = styles['Heading1']
+    title_style.alignment = TA_CENTER
+    title = Paragraph("Final Reports", title_style)
+    elements.append(title)
+
+    # Create table headers
+    table_data = [['Username', 'Filename', 'Input1', 'Input2', 'Input3', 'Input4', 'Input5', 'QC Check', 'QC Done By', 'Created Time', 'QC Submission Time']]
+
+    # Add report data to table
+    for report in reports:
+        row = [
+            report['username'], 
+            report['filename'], 
+            report['input1'], 
+            report['input2'], 
+            report['input3'], 
+            report['input4'], 
+            report['input5'], 
+            report['qc_check'], 
+            report['qc_done_by'], 
+            str(report['created_time']), 
+            str(report['qc_submission_time'])
+        ]
+        table_data.append(row)
+
+    # Adjust column widths dynamically to fit the content
+    col_widths = [
+        1.5 * inch,  # Username
+        2.0 * inch,  # Filename
+        1.5 * inch,  # Input1
+        1.5 * inch,  # Input2
+        1.5 * inch,  # Input3
+        1.5 * inch,  # Input4
+        1.5 * inch,  # Input5
+        1.0 * inch,  # QC Check
+        1.5 * inch,  # QC Done By
+        2.0 * inch,  # Created Time
+        2.0 * inch   # QC Submission Time
+    ]
+
+    # Define table style
+    table = Table(table_data, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),  # Header background
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Header text color
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center all text
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Bold headers
+        ('FONTSIZE', (0, 0), (-1, -1), 9),  # Font size
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Padding for header
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Row background color
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),  # Gridlines
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),  # Alternate row colors
+    ]))
+
+    elements.append(table)
+
+    # Build the PDF
+    doc.build(elements)
+
+    # Return the PDF as a downloadable file
+    pdf_buffer.seek(0)
+    return send_file(pdf_buffer, download_name='final_reports.pdf', as_attachment=True, mimetype='application/pdf')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in')
+    session.pop('username')
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

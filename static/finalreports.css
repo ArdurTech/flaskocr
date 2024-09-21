@@ -1,18 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
-*{ 
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Karla', sans-serif;
-} 
+}
 
-/* Review Page Styles */
+/* Body styling */
 body {
-    font-family: Arial, sans-serif;
     background: url('../static/logo/back2.jpg') no-repeat center center fixed; 
     background-size: cover;
-    margin: 0;
-    padding: 0;
 }
 
 /* Header styling */
@@ -39,22 +37,21 @@ header {
     height: auto;
 }
 
-h4{
+h4 {
+    color: #ffffff;
+}
+
+h2 {
     color: #ffffff;
 }
 
 /* User icon in header */
 #userIcon {
-    width: 30px; /* Adjust size as needed */
-    height: 30px; /* Adjust size as needed */
-    border-radius: 50%; /* Makes the icon circular */
-    margin-right: 8px; /* Spacing between icon and username */
-    vertical-align: middle; /* Aligns icon with text */
-}
-
-#userlogo{
     width: 30px;
-    height: 27px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 /* Right section of the header */
@@ -75,20 +72,20 @@ h4{
     font-weight: bold;
     padding: 8px 12px;
     font-size: 15px;
-    color: #000000; /* White text color for contrast */
-    background-color: #ffffff; /* Brand blue background */
-    border-radius: 5px; /* Fully rounded corners for a pill-shaped appearance */
-    text-transform: uppercase; /* Uppercase text for a bold statement */
-    letter-spacing: 1px; /* Slight spacing between letters for a clean look */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Stronger shadow for emphasis */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transform on hover */
+    color: #000000;
+    background-color: #ffffff;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 #username:hover {
-    transform: translateY(-2px); /* Slight lift on hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
-    background-color: #b0d1f5; /* Darker blue on hover */
-    cursor: pointer; /* Pointer cursor to indicate interactivity */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    background-color: #b0d1f5;
+    cursor: pointer;
 }
 
 /* Dropdown content styling */
@@ -131,7 +128,7 @@ h4{
     width: 100%;
     text-align: left;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #07270bda, #2b8ac2); /* Gradient background */
+    background: linear-gradient(135deg, #07270bda, #2b8ac2);
     color: #fff;
     border: none;
     cursor: pointer;
@@ -146,8 +143,8 @@ h4{
 }
 
 .dropdown-content .logout-button:hover {
-    background-color: #b71c1c69; /* Darker red */
-    transform: scale(1.05); /* Slight scale effect */
+    background-color: #b71c1c69;
+    transform: scale(1.05);
 }
 
 /* Dropdown button styling */
@@ -155,7 +152,7 @@ h4{
     width: 100%;
     text-align: left;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #0056b3, #8dbef1); /* Gradient background */
+    background: linear-gradient(135deg, #0056b3, #8dbef1);
     color: #fff;
     border: none;
     cursor: pointer;
@@ -169,8 +166,8 @@ h4{
 }
 
 .dropdown-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    transform: scale(1.05); /* Slight scale effect */
+    background-color: #0056b3;
+    transform: scale(1.05);
 }
 
 .dropdown:hover .dropdown-content {
@@ -181,61 +178,41 @@ h4{
     display: block;
 }
 
-
-/* Main content styling */
-#mainContent {
-    padding: 20px;
-    background: #ffffff00;
-    border-radius: 8px;
-    max-width: 1800px;
-    margin: 0 auto;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Reports Section */
+#reportsSection {
+    margin: 20px;
+    display: none; /* Initially hidden */
 }
 
-/* Date filter styling */
-#dateFilterContainer {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-}
-
-#dateFilterLabel {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-#dateFilterInput {
-    font-size: 16px;
-    padding: 8px;
-    border: 1px solid #fff8f8;
-    border-radius: 4px;
-}
-
-/* Total submissions count */
-#totalCountContainer {
-    margin-bottom: 20px;
-    color: #f4f4f4;
-    font-size: 18px;
-    font-weight: bold;
+#reportsSection h2 {
+    margin-top: 0;
 }
 
 /* Table styling */
 table {
     width: 100%;
     border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #fff;
 }
 
 table th, table td {
-    padding: 10px;
     border: 1px solid #ddd;
+    padding: 8px;
     text-align: left;
-    color: #f4f4f4;
 }
 
 table th {
     background-color: #f4f4f4;
-    color: #000;
-    font-weight: bold;
+    color: #333;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
 }
 
 /* Popup styling */
@@ -261,7 +238,7 @@ table th {
 }
 
 .popup-button {
-    background-color: #022d35;
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -273,3 +250,22 @@ table th {
 .popup-button:hover {
     background-color: #0056b3;
 }
+
+
+/* Add to lead.css or a new CSS file */
+.download-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+    background-color: #0056b3;
+}
+
+
