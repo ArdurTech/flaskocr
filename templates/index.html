@@ -212,6 +212,10 @@
             inputContainer.appendChild(newInput);
             inputContainer.appendChild(addButton);
 
+            // Insert the new container just below the last added input/button container
+            const currentInputContainer = document.getElementById(id).parentNode; // Get the parent container of the current input
+            currentInputContainer.parentNode.insertBefore(inputContainer, currentInputContainer.nextSibling);
+
             document.getElementById(`${section}Fields`).appendChild(inputContainer);
 
             // Add event listener for formatting on the new input field
@@ -353,25 +357,40 @@
                     });
             });
             document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
+            // Handle text selection (drag/drop)
             input.addEventListener('input', function() {
                 const selectedText = window.getSelection().toString();
                 if (selectedText && document.activeElement === document.getElementById('grantor')) {
-                    const cleanedText = selectedText.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
-                    const nameParts = cleanedText.split(/\s+/);
+                    formatAndSetGrantorText(selectedText, input);
+                }
+            });
 
-                    if (nameParts.length >= 2) {
-                        const firstName = nameParts[0];
-                        const lastName = nameParts[nameParts.length - 1];
-                        const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
-
-                        const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
-                        input.value = formattedName;
-                    } else {
-                        input.value = cleanedText; // Fallback
-                    }
+            // Handle copy-paste
+            input.addEventListener('paste', function(event) {
+                const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+                if (document.activeElement === document.getElementById('grantor')) {
+                    event.preventDefault(); // Prevent the default paste behavior
+                    formatAndSetGrantorText(pastedText, input);
                 }
             });
         });
+
+        function formatAndSetGrantorText(text, input) {
+            const cleanedText = text.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
+            const nameParts = cleanedText.split(/\s+/);
+
+            if (nameParts.length >= 2) {
+                const firstName = nameParts[0];
+                const lastName = nameParts[nameParts.length - 1];
+                const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+
+                const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
+                input.value = formattedName;
+            } else {
+                input.value = cleanedText; // Fallback if not enough parts
+            }
+        }
+
 
             document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
                 input.addEventListener('input', checkInputsFilled);
