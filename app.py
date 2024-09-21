@@ -741,7 +741,7 @@ def download_pdf():
         2.0 * inch   # QC Submission Time
     ]
 
-    # Define table style
+    # Define table styles
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),  # Header background
