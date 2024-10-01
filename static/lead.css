@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
 
-* {
+*{ 
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Karla', sans-serif;
 }
 
-/* General Page Styles */
+/* General Styling */
 body {
     font-family: Arial, sans-serif;
     background: url('../static/logo/back2.jpg') no-repeat center center fixed;
@@ -35,6 +35,12 @@ header {
     align-items: center;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
 #companyLogo {
     width: 150px;
     height: auto;
@@ -42,9 +48,24 @@ header {
 
 h4 {
     color: #ffffff;
+    margin-right: 10%;
 }
 
-/* User Icon in Header */
+h2 {
+    color: #050000;
+    margin-bottom: 15px; /* Adjusts space below the header */
+    font-size: 2em; /* Adjust the size as needed */
+    text-align: center; /* Center align the header */
+    
+}
+
+.vertical-pipe {
+    margin-left:10px;
+    margin-right: 10px;
+    color: #ffffff;
+}
+
+/* User icon in header */
 #userIcon {
     width: 30px;
     height: 30px;
@@ -53,105 +74,90 @@ h4 {
     vertical-align: middle;
 }
 
-#userlogo {
-    width: 30px;
-    height: 27px;
-}
-
-/* Right Section of the Header */
-.header-right {
-    display: flex;
-    align-items: center;
-}
-
-/* Dropdown Styling */
-.dropdown {
-    position: relative;
-    display: inline-block;
-    margin-right: 20px;
-    cursor: pointer;
-}
-
 #username {
     font-weight: bold;
-    padding: 8px 12px;
-    font-size: 15px;
-    color: #000000;
-    background-color: #ffffff;
-    border-radius: 5px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #ffffff;
 }
 
-#username:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
-    background-color: #b0d1f5;
+/* Menu icon styling */
+.menuIcon {
+    font-size: 24px; /* Adjust the size as needed */
     cursor: pointer;
+    margin-left: 20px;
+    color: #ffffff;
+}
+
+/* Styling for the current time display */
+.current-time {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 20px;
+    color: #ffffff;
+}
+
+/* General Dropdown Styles */
+.dropdown {
+    position: relative; /* Position for dropdown items */
 }
 
 /* Dropdown Content Styling */
 .dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: #fafafae7;
-    min-width: 200px;
-    border-radius: 8px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    overflow: hidden;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 0;
-    transform: translateY(10px);
+    display: none; /* Initially hide dropdown */
+    position: absolute; /* Position below the dropdown button */
+    right: 0; /* Align to the right */
+    background-color: #ffffff; /* White background for dropdown */
+    min-width: 200px; /* Minimum width of dropdown */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    z-index: 1000; /* Make sure it's on top */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    opacity: 0; /* Initially transparent */
+    transform: translateY(10px); /* Slightly shift down */
 }
 
+/* Show dropdown when active */
 .dropdown-content.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+    display: block; /* Show the dropdown */
+    opacity: 1; /* Fully opaque */
+    transform: translateY(0); /* Reset position */
 }
 
+/* Individual Items in Dropdown */
 .dropdown-content p {
-    color: #333;
-    padding: 12px 16px;
-    text-decoration: none;
-    margin: 0;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+    padding: 12px 16px; /* Padding for items */
+    color: #333; /* Dark text color */
+    margin: 0; /* Remove margin */
+    font-size: 14px; /* Font size */
+    text-align: left; /* Align text to the left */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background transition */
 }
 
+/* Hover Effect for Dropdown Items */
 .dropdown-content p:hover {
-    background-color: #f0f0f0;
-    cursor: pointer;
+    background-color: #f0f0f0; /* Light grey background on hover */
 }
 
+/* Logout Button Styling */
 .dropdown-content .logout-button {
-    width: 100%;
-    text-align: left;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #07270bda, #2b8ac2);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 0 0 8px 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 16px;
-    text-align: center;
+    background: linear-gradient(135deg, #07270bda, #2b8ac2); /* Gradient background */
+    color: #fff; /* White text */
+    padding: 12px 16px; /* Padding */
+    border: none; /* Remove border */
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+    width: 100%; /* Full width */
+    text-align: left; /* Align text to the left */
+    transition: background-color 0.3s ease; /* Background transition */
 }
 
+/* Hover Effect for Logout Button */
 .dropdown-content .logout-button:hover {
-    background-color: #b71c1c69;
-    transform: scale(1.05);
+    background-color: #b71c1c69; /* Darken on hover */
+    transform: scale(1.05); /* Slightly scale up */
 }
 
-/* Dropdown Button Styling */
+/* Dropdown button styling */
 .dropdown-button {
     width: 100%;
     text-align: left;
@@ -254,10 +260,11 @@ table th {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 300px; /* Ensure a minimum width */
 }
 
 .popup-button {
-    background-color: #022d35;
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -268,4 +275,99 @@ table th {
 
 .popup-button:hover {
     background-color: #0056b3;
+}
+
+/* Container for dropdowns */
+.dropdowns-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px;
+}
+
+/* Style for individual dropdown selects */
+.dropdown-select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* New updates section */
+.new-updates-section {
+    margin: 20px;
+    text-align: center;
+}
+
+#newUpdateButton {
+    padding: 10px 20px;
+    background-color: #0288d1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#newUpdateButton:hover {
+    background-color: #0277bd;
+}
+
+/* Popup overlay for new updates */
+.custom-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.custom-popup-content {
+    background-color: rgba(255, 255, 255, 0);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+}
+
+.custom-popup-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: #fafafa;
+}
+
+#updateTextArea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.submit-update-button, .cancel-update-button {
+    padding: 10px 15px;
+    background-color: #0288d1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancel-update-button {
+    background-color: #757575;
+}
+
+.submit-update-button:hover {
+    background-color: #0277bd;
+}
+
+.cancel-update-button:hover {
+    background-color: #616161;
 }

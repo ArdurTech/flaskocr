@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
+
 *{ 
     margin: 0;
     padding: 0;
@@ -6,7 +7,7 @@
     font-family: 'Karla', sans-serif;
 } 
 
-/* General body styling */
+/* General Styling */
 body {
     font-family: Arial, sans-serif;
     background: url('../static/logo/back2.jpg') no-repeat center center fixed; 
@@ -28,6 +29,7 @@ header {
     background: linear-gradient(135deg, #eee2e2a1, #2b8bc236);
     box-shadow: 0 2px 4px rgba(3, 3, 3, 0.726);
     width: 100%;
+    height: 48px;
     box-sizing: border-box;
 }
 
@@ -37,12 +39,32 @@ header {
     align-items: center;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
 #companyLogo {
     width: 150px;
     height: auto;
 }
 
-h4{
+h4 {
+    color: #ffffff;
+    margin-right: 10%;
+}
+
+h2 {
+    color: #050000;
+    margin-bottom: 15px; /* Adjusts space below the header */
+    font-size: 2em; /* Adjust the size as needed */
+    text-align: center; /* Center align the header */
+}
+
+.vertical-pipe {
+    margin-left:10px;
+    margin-right: 10px;
     color: #ffffff;
 }
 
@@ -57,97 +79,90 @@ h4{
 
 #userlogo{
     width: 30px;
-    height: 27px;
-}
-
-/* Right section of the header */
-.header-right {
-    display: flex;
-    align-items: center;
-}
-
-/* Dropdown styling */
-.dropdown {
-    position: relative;
-    display: inline-block;
-    margin-right: 20px;
-    cursor: pointer;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 #username {
     font-weight: bold;
-    padding: 8px 12px;
-    font-size: 15px;
-    color: #000000; /* White text color for contrast */
-    background-color: #ffffff; /* Brand blue background */
-    border-radius: 5px; /* Fully rounded corners for a pill-shaped appearance */
-    text-transform: uppercase; /* Uppercase text for a bold statement */
-    letter-spacing: 1px; /* Slight spacing between letters for a clean look */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Stronger shadow for emphasis */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transform on hover */
+    text-transform: uppercase;
+    color: #ffffff;
 }
 
-#username:hover {
-    transform: translateY(-2px); /* Slight lift on hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
-    background-color: #b0d1f5; /* Darker blue on hover */
-    cursor: pointer; /* Pointer cursor to indicate interactivity */
+/* Menu icon styling */
+.menuIcon {
+    font-size: 24px; 
+    cursor: pointer;
+    margin-left: 20px;
+    color: #ffffff;
 }
 
-/* Dropdown content styling */
+
+.current-time {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 20px;
+    color: #ffffff;
+}
+
+/* General Dropdown Styles */
+.dropdown {
+    position: relative; /* Position for dropdown items */
+}
+
+/* Dropdown Content Styling */
 .dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: #fafafae7;
-    min-width: 200px;
-    border-radius: 8px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    overflow: hidden;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 0;
-    transform: translateY(10px);
+    display: none; /* Initially hide dropdown */
+    position: absolute; /* Position below the dropdown button */
+    right: 0; /* Align to the right */
+    background-color: #ffffff; /* White background for dropdown */
+    min-width: 200px; /* Minimum width of dropdown */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    z-index: 1010; /* Make sure it's on top */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    opacity: 0; /* Initially transparent */
+    transform: translateY(10px); /* Slightly shift down */
 }
 
+/* Show dropdown when active */
 .dropdown-content.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+    display: block; /* Show the dropdown */
+    opacity: 1; /* Fully opaque */
+    transform: translateY(0); /* Reset position */
 }
 
+/* Individual Items in Dropdown */
 .dropdown-content p {
-    color: #333;
-    padding: 12px 16px;
-    text-decoration: none;
-    margin: 0;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+    padding: 12px 16px; /* Padding for items */
+    color: #333; /* Dark text color */
+    margin: 0; /* Remove margin */
+    font-size: 14px; /* Font size */
+    text-align: left; /* Align text to the left */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background transition */
 }
 
+/* Hover Effect for Dropdown Items */
 .dropdown-content p:hover {
-    background-color: #f0f0f0;
-    cursor: pointer;
+    background-color: #f0f0f0; /* Light grey background on hover */
 }
 
+/* Logout Button Styling */
 .dropdown-content .logout-button {
-    width: 100%;
-    text-align: left;
-    padding: 12px 16px;
     background: linear-gradient(135deg, #07270bda, #2b8ac2); /* Gradient background */
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 0 0 8px 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 16px;
-    text-align: center;
+    color: #fff; /* White text */
+    padding: 12px 16px; /* Padding */
+    border: none; /* Remove border */
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+    width: 100%; /* Full width */
+    text-align: left; /* Align text to the left */
+    transition: background-color 0.3s ease; /* Background transition */
 }
 
+/* Hover Effect for Logout Button */
 .dropdown-content .logout-button:hover {
     background-color: #b71c1c69; /* Darker red */
     transform: scale(1.05); /* Slight scale effect */
@@ -242,7 +257,8 @@ h4{
     width: 48%;
     height: 85vh;
     max-width: 100%;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
 /* Centered canvas with rounded corners */
@@ -309,26 +325,27 @@ canvas {
 #sideNav {
     position: fixed;
     right: 1px;
-    top: 65px;
-    width: 280px;
-    height: 85%;
-    background-color: #f9f9f900; /* Adjust background color as needed */
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0);
+    top: 55px;
+    width: 300px;
+    height: 90%;
+    background-color: #0c2630; /* Adjust background color as needed */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2); /* Added shadow for depth */
     padding: 20px;
     overflow-y: auto;
-    z-index: 1; /* Ensure it's above other content */
+    z-index: 1000; /* Ensure it's above other content */
     transition: width 0.3s ease-in-out;
 }
 
 /* Input fields styling */
 #sideNav input[type="text"] {
-    width: 100%;
+    width: calc(100% - 10px); /* Adjust width to fit within padding */
     padding: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px; /* Space below input fields */
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 14px;
+    z-index: 0;
     color: #000000;
     background-color: #fff;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -342,18 +359,53 @@ canvas {
 }
 
 /* Submit button styling */
-#sideNav #submitButton {
+#submitButton {
+    position: sticky;
     width: 95%;
+    bottom: 0;
     padding: 10px;
-    background-color: #2599db; /* Disabled color */
+    background-color: #2599db; /* Button color */
     color: #fff;
     border: none;
     border-radius: 4px;
     font-size: 14px;
-    cursor: auto; 
+    cursor: pointer; 
     transition: background-color 0.3s ease;
+    margin-top: 15px; /* Add margin to create space above the button */
 }
 
+#partyHeader, #legalHeader, #masterHeader, #deHeader {
+    font-size: 24px;
+    color: #f8f4f4; /* Example */
+    margin-bottom: 10px; /* Space below headers */
+    text-align: center;
+}
+
+/* Styling for prefix dropdowns */
+.prefix-dropdown {
+    padding: 2px; /* Reduced padding for a smaller dropdown */
+    margin-right: 4px; /* Space between dropdown and input */
+    border: 1px solid #ccc; /* Border for the dropdown */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 12px; /* Reduced font size */
+    width: 10px; /* Set a specific width */
+    min-width: 0px; /* Set minimum width */
+    background-color: #f9f9f9; /* Light background */
+    color: #000000; /* Text color for dropdown */
+    transition: border-color 0.3s ease; /* Smooth transition */
+}
+
+
+/* Hover effect for dropdown */
+.prefix-dropdown:hover {
+    border-color: #4CAF50; /* Change border on hover */
+}
+
+/* Focus effect for dropdown */
+.prefix-dropdown:focus {
+    border-color: #4CAF50; /* Change border on focus */
+    outline: none; /* Remove default outline */
+}
 
 /* Prevent the canvas or main content from overlapping with the side nav */
 #mainContent {
@@ -363,15 +415,17 @@ canvas {
 
 .button-group {
     position: sticky; /* Stick to the top */
-    top: 0; /* Distance from the top */
-    background: rgba(255, 255, 255, 0); /* Background color for visibility */
-    z-index: 10; /* Keep it on top of other content */
-    padding: 10px; /* Add some padding */
-}
+    top: -20px; /* Stick to the very top */
+    height: auto; /* Adjust height based on your preference */
+    background: #052633; /* Background color for visibility */
+    z-index: 9999; /* Keep it on top of other content */
+    padding: 10px 12px; /* Add more padding for increased height */
+}   
+
 
 /* Button styles */
 .button-group button {
-    background-color: #007BFF; /* Primary color */
+    background-color: #00a2ffda; /* Primary color */
     color: white;
     border: none;
     border-radius: 5px;
@@ -386,7 +440,6 @@ canvas {
 }
 .input-fields-container {
     height: calc(100vh - 50px); /* Adjust based on button height */
-    overflow-y: auto; /* Allow vertical scrolling */
     padding: 10px; /* Optional padding */
 }
 
@@ -394,14 +447,28 @@ canvas {
     margin-bottom: 20px; /* Space between fields */
 }
 
+.input-container {
+    position: relative; /* Needed for positioning the icon */
+}
 
 /* Input field styles */
 .input-fields input[type="text"] {
-    width: calc(100% - 20px);
+    width: calc(100% - 40px); /* Adjust width for icon and button */
     padding: 10px;
     margin: 5px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+/* Icon styling */
+.icon {
+    position: absolute; /* Position the icon inside the input */
+    right: 25px; /* Leave space for the button */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust vertical alignment */
+    font-size: 18px; /* Icon size */
+    color: #000000; /* Icon color */
+    cursor: pointer; /* Pointer cursor on hover */
 }
 
 /* For smaller screens, make the sideNav responsive */
@@ -487,3 +554,24 @@ canvas {
     font-size: inherit; /* Inherit font size */
     outline: none; /* Remove outline */
 }
+
+.remove-button {
+    margin-left: 5px; /* Space between input and button */
+    border-radius: 0%;
+    background: transparent; /* No background */
+    color: #f5f3f3; /* Text color */
+    border: none; /* No border */
+    padding: 0; /* No padding */
+    cursor: pointer; /* Pointer on hover */
+    font-size: inherit; /* Inherit font size */
+    outline: none; /* Remove outline */
+}
+
+.grantor-input, .grantee-input {
+    flex-grow: 1; /* Allow these inputs to take up remaining space */
+    padding: 5px; /* Padding for better touch target */
+    font-size: 14px; /* Font size */
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Rounded corners */
+}
+

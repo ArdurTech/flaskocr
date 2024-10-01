@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap');
+
 *{ 
     margin: 0;
     padding: 0;
@@ -8,76 +9,183 @@
 
 /* General Styling */
 body {
+    font-family: Arial, sans-serif;
+    background: url('../static/logo/back2.jpg') no-repeat center center fixed;
+    background-size: cover;
     margin: 0;
     padding: 0;
-    background-image: url('../static/logo/back2.jpg');
 }
 
+
+/* Header styling */
 header {
-    background: linear-gradient(135deg, #eee2e2a1, #2b8bc236);
-    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #eee2e2a1, #2b8bc236);
+    box-shadow: 0 2px 4px rgba(3, 3, 3, 0.726);
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+}
+
+/* Left section of the header */
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
 #companyLogo {
-    height: 27px;
+    width: 150px;
+    height: auto;
 }
 
-/* Main Content */
-#mainContent {
+h4 {
+    color: #ffffff;
+    margin-right: 10%;
+}
+
+h2 {
+    color: #050000;
+    margin-bottom: 15px; /* Adjusts space below the header */
+    font-size: 2em; /* Adjust the size as needed */
+    text-align: center; /* Center align the header */
+}
+
+.vertical-pipe {
+    margin-left:10px;
+    margin-right: 10px;
+    color: #ffffff;
+}
+
+/* User icon in header */
+#userIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+#username {
+    font-weight: bold;  
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+/* Menu icon styling */
+.menuIcon {
+    font-size: 24px; /* Adjust the size as needed */
+    cursor: pointer;
+    margin-left: 20px;
+    color: #ffffff;
+}
+
+/* Styling for the current time display */
+.current-time {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 20px;
+    color: #ffffff;
+}
+
+/* General Dropdown Styles */
+.dropdown {
+    position: relative; /* Position for dropdown items */
+}
+
+/* Dropdown Content Styling */
+.dropdown-content {
+    display: none; /* Initially hide dropdown */
+    position: absolute; /* Position below the dropdown button */
+    right: 0; /* Align to the right */
+    background-color: #ffffff; /* White background for dropdown */
+    min-width: 200px; /* Minimum width of dropdown */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    z-index: 1000; /* Make sure it's on top */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    opacity: 0; /* Initially transparent */
+    transform: translateY(10px); /* Slightly shift down */
+}
+
+/* Show dropdown when active */
+.dropdown-content.show {
+    display: block; /* Show the dropdown */
+    opacity: 1; /* Fully opaque */
+    transform: translateY(0); /* Reset position */
+}
+
+/* Individual Items in Dropdown */
+.dropdown-content p {
+    padding: 12px 16px; /* Padding for items */
+    color: #333; /* Dark text color */
+    margin: 0; /* Remove margin */
+    font-size: 14px; /* Font size */
+    text-align: left; /* Align text to the left */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background transition */
+}
+
+/* Hover Effect for Dropdown Items */
+.dropdown-content p:hover {
+    background-color: #f0f0f0; /* Light grey background on hover */
+}
+
+/* Logout Button Styling */
+.dropdown-content .logout-button {
+    background: linear-gradient(135deg, #07270bda, #2b8ac2); /* Gradient background */
+    color: #fff; /* White text */
+    padding: 12px 16px; /* Padding */
+    border: none; /* Remove border */
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+    width: 100%; /* Full width */
+    text-align: left; /* Align text to the left */
+    transition: background-color 0.3s ease; /* Background transition */
+}
+
+/* Hover Effect for Logout Button */
+.dropdown-content .logout-button:hover {
+    background-color: #b71c1c69; /* Darken on hover */
+    transform: scale(1.05); /* Slightly scale up */
+}
+
+/* Dropdown button styling */
+.dropdown-button {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #0056b3, #8dbef1);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 0;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     display: flex;
-    flex-direction: column;
-    justify-content: space-around; /* Distribute containers evenly in the vertical direction */
     align-items: center;
-    height: calc(100vh - 50px); /* Adjust height to account for header */
-    padding: 20px;
+    justify-content: space-between;
+    text-align: center;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%; /* Ensure containers take the full width */
-    height: 33%; /* Ensure containers take up one-third of the height */
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin: 5px 0; /* Space between containers */
-    background-position: 10%; /* Center the background image */
-    background-size: 100%;
+.dropdown-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
 }
 
-/* Specific styling for each container */
-#dataEntryContainer {
-    background-image: url('../static/logo/dataentry.jpg'); /* Path to your background image */
+.dropdown:hover .dropdown-content {
+    display: block;
 }
 
-#qcContainer {
-    background-image: url('../static/logo/qc.jpg'); /* Path to your background image */
-}
-
-#leadContainer {
-    background-image: url('../static/logo/1.jpg'); /* Path to your background image */
-}
-
-.action-button {
-    color: #fdf8f8;
-    text-decoration: none;
-    background: rgb(0, 0, 0);
-    padding: 10px 15px;
-    font-size: x-large;
-    border-radius: 7px;
-
-} 
-
-.action-button:hover {
-    background: transparent;
-    border: 1px solid #f7f7f7;
-    color: #000000;
+.show {
+    display: block;
 }
 
 .alert-container {
@@ -136,20 +244,156 @@ header {
     cursor: pointer;
 }
 
-/* Media Queries for Responsiveness */
+/* Popup styling */
+.popup-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Make sure it's on top */
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 300px; /* Ensure a minimum width */
+}
+
+.popup-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.popup-button:hover {
+    background-color: #0056b3;
+}
+
+/* Media query for responsive design adjustments */
+@media (max-width: 600px) {
+    .dropdown-content {
+        min-width: 150px; /* Adjust width for smaller screens */
+    }
+}
+
+/* General reset for margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.dashboard-content {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Cards adapt to screen size */
+    gap: 20px; /* Spacing between cards */
+    max-width: 1200px; /* Limit max width for better readability */
+    margin: 0 auto;
+}
+
+.card {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Slightly deeper shadow for a card effect */
+    padding: 20px;
+    color: #0e2f44;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.02); /* Slight zoom on hover */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    text-align: center; /* Align titles to the left */
+    color: #092c2c;
+}
+
+.updates-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.updates-list li {
+    background-color: #f9f9f9f3;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.updates-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(8, 6, 6, 0.9);
+}
+
+.updates-list li .update-content {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: #01070e;
+}
+
+.updates-list li .update-meta {
+    font-size: 0.9em;
+    color: #1d2c2c;
+}
+
+#refreshUpdatesButton {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #0b2435;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+#refreshUpdatesButton:hover {
+    background-color: #2980b9;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-    #companyLogo {
-        height: 40px;
+    .updates-container {
+        flex-direction: column; /* Stack sections on smaller screens */
+        align-items: center; /* Center sections */
     }
 
-    .container {
-        width: 90%; /* Adjust width for smaller screens */
-        height: 25%; /* Adjust height for smaller screens */
+    .dashboard-section {
+        max-width: 90%; /* Adjust max-width for mobile */
+        margin: 10px 0; /* Margin for spacing */
     }
 
-    .action-button {
-        padding: 15px 30px; /* Adjust button padding for smaller screens */
-        font-size: 18px;
+    #recentUpdatesList li,
+    #newUpdatesList li {
+        font-size: 14px;
+        padding: 12px;
     }
 }
 

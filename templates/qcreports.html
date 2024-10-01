@@ -10,13 +10,18 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username" class="hover-underline">{{ username }} ({{ role }})</span> <!-- Hover effect -->
         </div>
         <h4>QC Reports</h4>
         <div class="header-right">
+            <!-- Display current time -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
-                <div class="dropdown-content">
+                <!-- Menu icon -->
+                <div class="menuIcon" onClick="toggleMenu()">☰</div>
+                <div id="dropdownContent" class="dropdown-content">
                     <button id="homeButton" class="dropdown-button">DataEntry</button>
                     <button id="qcButton" class="dropdown-button">QC</button>
                     <button id="logoutButton" class="logout-button">Logout</button>
@@ -27,7 +32,6 @@
     
     <!-- Reports Section -->
 <div id="reportsSection">
-    <h2>QC Reports</h2>
     <table>
         <thead>
             <tr>
@@ -67,12 +71,22 @@
             this.querySelector('.dropdown-content').classList.toggle('show');
         });
 
+         // Fetch current time and update in the header without seconds
+        function showCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+            currentTimeElement.textContent = now.toLocaleTimeString([], options);
+        }
+        showCurrentTime();
+        setInterval(showCurrentTime, 1000); // Update time every second
+
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            if (!event.target.matches('#username')) {
-                var dropdowns = document.getElementsByClassName('dropdown-content');
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
+            if (!event.target.matches('.menuIcon')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
                     if (openDropdown.classList.contains('show')) {
                         openDropdown.classList.remove('show');
                     }

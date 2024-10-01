@@ -10,13 +10,18 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username" class="hover-underline">{{ username }} ({{ role }})</span> <!-- Hover effect -->
         </div>
         <h4>Quality Check</h4>
         <div class="header-right">
+            <!-- Display current time -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
-                <div class="dropdown-content">
+                <!-- Menu icon -->
+                <div class="menuIcon" onClick="toggleMenu()">☰</div>
+                <div id="dropdownContent" class="dropdown-content">
                     <button id="reportsButton" class="dropdown-button">Reports</button>
                     <button id="homeButton" class="dropdown-button">DataEntry</button>
                     <button id="logoutButton" class="logout-button">Logout</button>
@@ -48,8 +53,6 @@
         <div id="fileInputs">
             <!-- Input fields will be dynamically added here -->
         </div>
-        <!-- Next Button -->
-        <button id="nextButton" style="display: none;">Next</button>
         <!-- Submit Button (initially hidden) -->
         <button id="submitButton" style="display: none;">Submit</button>
     </div>
@@ -90,6 +93,22 @@
                 console.error('Error fetching users:', error);
             }
         }
+
+        // Show/Hide the dropdown content
+        function toggleMenu() {
+            const dropdownContent = document.getElementById('dropdownContent');
+            dropdownContent.classList.toggle('show');
+        }
+
+        // Fetch current time and update in the header without seconds
+        function showCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+            currentTimeElement.textContent = now.toLocaleTimeString([], options);
+        }
+        showCurrentTime();
+        setInterval(showCurrentTime, 1000); // Update time every second
 
         // Fetch files for the selected user and populate the file dropdown
         async function populateFileDropdown(username) {
@@ -134,7 +153,6 @@
                     <input type="text" id="input4" value="${data.input4}">
                     <label for="input5">Input 5:</label>
                     <input type="text" id="input5" value="${data.input5}">
-                    <button id="nextButton">Next</button>
                     <button id="submitButton" style="display: none;">Submit</button> <!-- Added here -->
                 `;
 
@@ -241,15 +259,15 @@
 
         // JavaScript for handling dropdown functionality
         document.querySelector('.dropdown').addEventListener('click', function() {
-            this.querySelector('.dropdown-content').classList.toggle('show');
+            this.querySelector('.dropdown-content').classList.toggleMenu('show');
         });
 
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            if (!event.target.matches('#username')) {
-                var dropdowns = document.getElementsByClassName('dropdown-content');
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
+            if (!event.target.matches('.menuIcon')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
                     if (openDropdown.classList.contains('show')) {
                         openDropdown.classList.remove('show');
                     }

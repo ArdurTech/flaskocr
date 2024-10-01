@@ -26,6 +26,7 @@ import database
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
+app.config['FOLDER'] = os.path.join(os.getcwd(), 'static/uploads/Batch1')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static/uploads/processed_files')
 # app.permanent_session_lifetime = datetime.timedelta(minutes=10)
 # Define a folder for saving processed files
@@ -34,12 +35,12 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # MySQL configurations
-app.config['MYSQL_HOST'] = 'ardurtech.mysql.database.azure.com'
-app.config['MYSQL_USER'] = 'aditya'
-app.config['MYSQL_PASSWORD'] = 'Admin3110'
-app.config['MYSQL_DB'] = 'ocr_database'
+app.config['MYSQL_HOST'] = '68.178.227.55'
+app.config['MYSQL_USER'] = 'ardurdev'
+app.config['MYSQL_PASSWORD'] = 'LAo1#qs6hsP}'
+app.config['MYSQL_DB'] = 'ardurtechnology'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config['MYSQL_SSL_CA'] = 'cert/DigiCertGlobalRootCA.crt.pem'
+# app.config['MYSQL_SSL_CA'] = 'cert/DigiCertGlobalRootCA.crt.pem'
 
 # Initialize the database and table
 with app.app_context():
@@ -86,6 +87,7 @@ def extract_text_from_image(image):
 def clean_text(text):
     # Remove specific unwanted patterns or words
     text = re.sub(r'Vv', 'V', text)
+    text = re.sub(r'Jovenber', 'November', text)
     text = re.sub(r'Bewember', 'December', text)
     text = re.sub(r'DAMPABAS', 'Lampasas', text)
     text = re.sub(r'Sohn', 'John', text)
@@ -200,8 +202,10 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Pass username to the template if needed
-    return render_template('dashboard.html', username=session.get('username'))
+    # Pass username and role to the template
+    username = session.get('username')
+    role = session.get('role')  # Get the user's role from the session
+    return render_template('dashboard.html', username=username, role=role)
 
 @app.route('/check_role_access/<role>', methods=['GET'])
 def check_role_access(role):
@@ -209,8 +213,12 @@ def check_role_access(role):
     user_role = session.get('role')
     
     # Logic to check if the user has access based on role hierarchy
-    if role == 'dataentry' and user_role not in ['dataentry', 'qc', 'lead']:
-        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access Data Entry.'})
+    if role == 'party' and user_role not in ['party',  'qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access party.'})
+    elif role == 'legal' and user_role not in ['legal', 'qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access legal.'})
+    elif role == 'master' and user_role not in ['master', 'qc', 'lead']:
+        return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access master.'})
     elif role == 'qc' and user_role not in ['qc', 'lead']:
         return jsonify({'access': False, 'message': 'Access Denied: You do not have permission to access QC.'})
     elif role == 'lead' and user_role != 'lead':
@@ -219,24 +227,29 @@ def check_role_access(role):
     # If access is granted
     return jsonify({'access': True})
 
+
 @app.route('/qc')
 @login_required
 @role_required(['qc', 'lead'])  # Only QC and Lead roles can access the QC page
 def qc():
     username = session.get('username')
-    return render_template('qc.html', username=username)
+    role = session.get('role')
+    return render_template('qc.html', username=username,  role=role)
+
 
 @app.route('/lead')
 @login_required
 @role_required(['lead'])  # Only Lead role can access the Lead page
 def lead():
     username = session.get('username')
-    return render_template('lead.html', username=username)
+    role = session.get('role')
+    return render_template('lead.html', username=username, role=role)
 
 @app.route('/finalreports')
 def final_reports():
     if 'username' in session:
         username = session['username']
+        role = session['role']
         connection = database.get_db_connection()
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
@@ -252,19 +265,43 @@ def final_reports():
         cursor.close()
         connection.close()
         
-        return render_template('finalreports.html', username=username, reports=reports)
+        return render_template('finalreports.html', username=username, reports=reports, role=role)
     else:
         return redirect(url_for('login'))
 
 @app.route('/')
-@role_required(['dataentry', 'qc', 'lead'])  # All roles can access the index page
+@role_required(['party', 'legal', 'master', 'qc', 'lead'])  # Allow access for specific roles
 @login_required
 def index():
     username = session.get('username')
     if username is None:
         flash('Please log in first.')
         return redirect(url_for('login'))  # Ensure redirection if username is None
-    return render_template('index.html', username=username)
+    
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    
+    try:
+        cursor.execute("SELECT role FROM user WHERE username = %s LIMIT 1", (username,))
+        user_row = cursor.fetchone()  # Fetch the user's role from the database
+    except Exception as e:
+        print("Database error:", e)  # Log the error for debugging
+        user_row = None  # Set user_row to None in case of error
+    finally:
+        cursor.close()
+        connection.close()
+
+    user_role = user_row[0] if user_row else 'party'  # Default role if none found
+
+    # Set the section based on the user role or default to 'party'
+    section = request.args.get('section', user_role)  # Set the section based on the role
+
+    print('User role:', user_role)  # Debug output
+    return render_template('index.html', username=username, role=user_role, section=section)
+
+
+
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -295,9 +332,9 @@ def submit_data():
     logging.info(f"User '{username}' is attempting to submit data.")
 
     # Get the file path from the request
-    filename = request.json.get('filepath', 'test')  # Default to 'test' if not provided
-    print(f"Selected filename: {filename}")
-    logging.info(f"Selected filename: {filename}")
+    filepath = request.json.get('filePath')  # Get the filePath directly
+    print(f"Selected filename: {filepath}")
+    logging.info(f"Selected filename: {filepath}")
 
     selected_section = request.json.get('selectedSection')  # Get the selected section
     print(f"Selected section: {selected_section}")
@@ -306,36 +343,62 @@ def submit_data():
     # Prepare data for insertion based on the selected section
     data = {
         'username': username,
-        'filename': filename,
+        'filename': filepath,  # Use filepath directly as filename
     }
 
-    # Check for required inputs and add them to the data dictionary
+    print(f"Incoming data: {request.json}")  # Log incoming data
+    logging.info(f"Incoming data: {request.json}")  # Log incoming data
+
+    # Handle the Party section
     if selected_section == 'party':
-        data.update({
-            'grantor': request.json.get('grantor'),
-            'grantee': request.json.get('grantee'),
-            'comment': request.json.get('comment')
-        })
+        # Handle 'grantor' and its dynamic 'extra-input' fields
+        grantor = request.json.get('grantor', '').strip()
+        grantor_extra = request.json.get('grantor_extra', '').strip()
+        
+        if grantor or grantor_extra:
+            grantor_values = grantor.split('|') if grantor else []
+            if grantor_extra:
+                grantor_values.extend(grantor_extra.split('|'))
+            data['grantor'] = '|'.join(filter(None, grantor_values))
+
+        # Handle 'grantee' and its dynamic 'extra-input' fields
+        grantee = request.json.get('grantee', '').strip()
+        grantee_extra = request.json.get('grantee_extra', '').strip()
+        
+        if grantee or grantee_extra:
+            grantee_values = grantee.split('|') if grantee else []
+            if grantee_extra:
+                grantee_values.extend(grantee_extra.split('|'))
+            data['grantee'] = '|'.join(filter(None, grantee_values))
+
+        # Handle 'comment'
+        comment = request.json.get('comment', '').strip()
+        if comment:
+            data['comment'] = comment
+
         print(f"Party data collected: {data}")
         logging.info(f"Party data collected: {data}")
 
+    # Handle the Legal section
     elif selected_section == 'legal':
         data.update({
-            'subdivision': request.json.get('subdivision'),
-            'platnum': request.json.get('platnum'),
-            'lot': request.json.get('lot'),
-            'block': request.json.get('block'),
-            'section': request.json.get('section'),
-            'abstractName': request.json.get('abstractName'),
-            'abstSvy': request.json.get('abstSvy'),
-            'acres': request.json.get('acres'),
-            'briefLegal': request.json.get('briefLegal'),
-            'refDocs': request.json.get('refDocs')
+            'subdivision': request.json.get('subdivision', '') or '',
+            'platnum': request.json.get('platnum', '') or '',
+            'lot': request.json.get('lot', '') or '',
+            'block': request.json.get('block', '') or '',
+            'section': request.json.get('section', '') or '',
+            'abstractName': request.json.get('abstractName', '') or '',
+            'abstSvy': request.json.get('abstSvy', '') or '',
+            'acres': request.json.get('acres', '') or '',
+            'briefLegal': request.json.get('briefLegal', '') or '',
+            'refDocs': request.json.get('refDocs', '') or ''
         })
         print(f"Legal data collected: {data}")
         logging.info(f"Legal data collected: {data}")
 
+    # Handle the Master section
     elif selected_section == 'master':
+        # Handle master section data
         data.update({
             'bookType': request.json.get('bookType'),
             'instrumentType': request.json.get('instrumentType'),
@@ -349,36 +412,15 @@ def submit_data():
             'consideration': request.json.get('consideration'),
             'userComment': request.json.get('userComment'),
             'instType': request.json.get('instType'),
-            'recordType': request.json.get('recordType')
+            'recordType': request.json.get('recordType'),
         })
         print(f"Master data collected: {data}")
         logging.info(f"Master data collected: {data}")
 
-    # Removed validation for required fields
-    # if not all(data.values()):
-    #     print("Not all fields are filled. Submission failed.")
-    #     logging.warning("Not all fields are filled. Submission failed.")
-    #     return jsonify({'success': False, 'error': 'All fields must be filled.'})
-
     # Create a secure filename
-    safe_filename = secure_filename(filename) if filename else 'test'  # Use 'test' if filename is empty
+    safe_filename = secure_filename(data['filename'])  # Clean the filename
     print(f"Secure filename created: {safe_filename}")
     logging.info(f"Secure filename created: {safe_filename}")
-
-    # Handle the image upload if applicable
-    image_data = request.json.get('imageData')  # Assuming the image is sent as base64
-    if image_data:
-        image_data = image_data.split(',')[1]  # Extract base64 data
-        image_bytes = base64.b64decode(image_data)
-
-        # Generate the final save path
-        save_path = os.path.join(UPLOAD_FOLDER, safe_filename)
-
-        # Save the file to the designated folder
-        with open(save_path, 'wb') as image_file:
-            image_file.write(image_bytes)
-        print(f"Image saved to: {save_path}")
-        logging.info(f"Image saved to: {save_path}")
 
     # Insert data into the appropriate table based on the selected section
     try:
@@ -386,47 +428,60 @@ def submit_data():
         cursor = connection.cursor()
 
         if selected_section == 'party':
-            cursor.execute("""
-                INSERT INTO party (username, filename, grantor, grantee, comment)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (username, safe_filename, data['grantor'], data['grantee'], data['comment']))
+            cursor.execute("""INSERT INTO party (username, filename, grantor, grantee, comment) VALUES (%s, %s, %s, %s, %s)""",
+                           (username, safe_filename, data.get('grantor'), data.get('grantee'), data.get('comment')))
             print("Party data inserted into the database.")
             logging.info("Party data inserted into the database.")
 
         elif selected_section == 'legal':
-            cursor.execute("""
-                INSERT INTO legal (username, filename, subdivision, platnum, lot, block, section, abstractName, abstSvy, acres, briefLegal, refDocs)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (username, safe_filename, data['subdivision'], data['platnum'], data['lot'], data['block'], data['section'], data['abstractName'], data['abstSvy'], data['acres'], data['briefLegal'], data['refDocs']))
+            cursor.execute("""INSERT INTO legal (username, filename, subdivision, platnum, lot, block, section, abstractName, abstSvy, acres, briefLegal, refDocs) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                           (username, safe_filename, data['subdivision'], data['platnum'], data['lot'], data['block'], data['section'], data['abstractName'], data['abstSvy'], data['acres'], data['briefLegal'], data['refDocs']))
             print("Legal data inserted into the database.")
             logging.info("Legal data inserted into the database.")
 
         elif selected_section == 'master':
-            cursor.execute("""
-                INSERT INTO master (username, filename, bookType, instrumentType, remarks, instNo, caseNo, volume, page, instrumentDate, fillingDate, consideration, userComment, instType, recordType)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (username, safe_filename, data['bookType'], data['instrumentType'], data['remarks'], data['instNo'], data['caseNo'], data['volume'], data['page'], data['instrumentDate'], data['fillingDate'], data['consideration'], data['userComment'], data['instType'], data['recordType']))
+            cursor.execute("""INSERT INTO master (username, filename, bookType, instrumentType, remarks, instNo, caseNo, volume, page, instrumentDate, fillingDate, consideration, userComment, instType, recordType) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                           (username, safe_filename, data['bookType'], data['instrumentType'], data['remarks'], data['instNo'], data['caseNo'], data['volume'], data['page'], data['instrumentDate'], data['fillingDate'], data['consideration'], data['userComment'], data['instType'], data['recordType']))
             print("Master data inserted into the database.")
             logging.info("Master data inserted into the database.")
 
         connection.commit()
-        cursor.close()
-        connection.close()
 
-        print("Data submission successful.")
-        logging.info("Data submission successful.")
-        return jsonify({'success': True})
+        # Move the uploaded file to the designated folder after successful submission
+        file_source_path = os.path.join(app.config['FOLDER'], filepath)
+        file_dest_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
+
+        # Logging the file paths
+        logging.info(f"Source file path: {file_source_path}")
+        logging.info(f"Destination file path: {file_dest_path}")
+
+        if os.path.exists(file_source_path):
+            os.rename(file_source_path, file_dest_path)  # Move the file to the new destination
+            logging.info(f"File moved to: {file_dest_path}")
+        else:
+            logging.error(f"File not found at: {file_source_path}")
+            return jsonify({'success': False, 'message': f'File not found: {file_source_path}'})
+
+        return jsonify({'success': True, 'message': 'Data submitted and file moved successfully.'})
 
     except Exception as e:
         print(f"Error during data submission: {e}")
         logging.error(f"Error during data submission: {e}")
         return jsonify({'success': False, 'message': str(e)})
+    finally:
+        cursor.close()
+        connection.close()
+
+
+
 
 @app.route('/review')
 def review():
+    role=session.get('role')
+
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('review.html', username=session['username'])
+    return render_template('review.html', role=role,  username=session['username'])
 
 @app.route('/submit_qc', methods=['POST'])
 @login_required
@@ -498,6 +553,7 @@ def find_next_file_for_user(username):
 def qc_reports():
     if 'username' in session:
         username = session['username']
+        role = session['role']
         connection = database.get_db_connection()
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
@@ -513,7 +569,7 @@ def qc_reports():
         cursor.close()
         connection.close()
         
-        return render_template('qcreports.html', username=username, reports=reports)
+        return render_template('qcreports.html', username=username, reports=reports, role=role)
     else:
         return redirect(url_for('login'))  # Redirect to login if user is not authenticated
 
@@ -537,18 +593,197 @@ def get_submissions():
 
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    # Check the user's role
+    role_query = "SELECT role FROM user WHERE username = %s"  # Assuming you have a users table
+    cursor.execute(role_query, (username,))
+    user_role = cursor.fetchone()
+
+    submissions = []
+
+    if user_role and user_role['role'] in ['qc', 'lead']:
+        # Fetch from all tables for qc and lead roles
+        party_query = '''
+            SELECT 'party' AS source, filename, grantor, grantee, comment, created_time
+            FROM party
+            WHERE DATE(created_time) = %s
+            AND username = %s
+        '''
+        
+        legal_query = '''
+            SELECT 'legal' AS source, filename, subdivision AS grantor, platnum AS grantee, 
+                lot AS comment, block, section, abstractName, abstSvy, acres, 
+                briefLegal, refDocs, created_time
+            FROM legal
+            WHERE DATE(created_time) = %s
+            AND username = %s
+        '''
+        
+        master_query = '''
+            SELECT 'master' AS source, filename, bookType AS grantor, instrumentType AS grantee, 
+                remarks AS comment, instNo, caseNo, volume, page, instrumentDate, 
+                fillingDate, consideration, userComment, instType, recordType, created_time
+            FROM master
+            WHERE DATE(created_time) = %s
+            AND username = %s
+        '''
+
+
+        # Execute each query and extend the submissions list
+        for query in [party_query, legal_query, master_query]:
+            cursor.execute(query, (formatted_date, username))
+            submissions.extend(cursor.fetchall())
     
-    query = '''
-        SELECT filename, input1, input2, input3, input4, input5, created_time
-        FROM ocrdata
-        WHERE username = %s AND DATE(created_time) = %s
-    '''
-    
-    cursor.execute(query, (username, formatted_date))
-    submissions = cursor.fetchall()
+    elif user_role and user_role['role'] == 'party':
+        query = '''
+            SELECT filename, grantor, grantee, comment, created_time
+            FROM party
+            WHERE username = %s AND DATE(created_time) = %s
+        '''
+        cursor.execute(query, (username, formatted_date))
+        submissions = cursor.fetchall()
+        
+    elif user_role and user_role['role'] == 'legal':
+        query = '''
+            SELECT filename, subdivision AS grantor, platnum AS grantee, 
+                   lot AS comment, created_time
+            FROM legal
+            WHERE username = %s AND DATE(created_time) = %s
+        '''
+        cursor.execute(query, (username, formatted_date))
+        submissions = cursor.fetchall()
+
+    elif user_role and user_role['role'] == 'master':
+        query = '''
+            SELECT filename, bookType AS grantor, instrumentType AS grantee, 
+                   remarks AS comment, created_time
+            FROM master
+            WHERE username = %s AND DATE(created_time) = %s
+        '''
+        cursor.execute(query, (username, formatted_date))
+        submissions = cursor.fetchall()
+
     conn.close()
 
     return jsonify({'submissions': submissions})
+
+@app.route('/submit_update', methods=['POST'])
+def submit_update():
+    if 'username' not in session or session.get('role') != 'lead':
+        logging.warning("Unauthorized access attempt by user: %s", session.get('username'))
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    update_text = data.get('update')
+
+    if not update_text:
+        return jsonify({'error': 'No update content provided'}), 400
+
+    # Example validation (adjust regex based on your requirements)
+    if not re.match(r'^[\w\s,.!?]+$', update_text):
+        return jsonify({'error': 'Invalid update content'}), 400
+
+    # Insert the update into the database
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = "INSERT INTO updates (content, created_by, created_time) VALUES (%s, %s, NOW())"
+        cursor.execute(query, (update_text, session['username']))
+        conn.commit()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+    return jsonify({'success': True})
+
+@app.route('/get_updates')
+def get_updates():
+    if 'username' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    username = session['username']
+
+    # Get today's date and the start of the month
+    today = datetime.date.today()
+    start_of_month = today.replace(day=1)
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    # Check the user's role
+    role_query = "SELECT role FROM user WHERE username = %s"
+    cursor.execute(role_query, (username,))
+    user_role = cursor.fetchone()
+
+    if not user_role:
+        return jsonify({'error': 'User role not found'}), 404
+
+    role = user_role['role']
+    submissions_data = {}
+
+    if role in ['qc', 'lead']:
+        # QC and Lead: Fetch submissions from all tables + OCR data count for QC role
+        query_templates = {
+            'party': "SELECT COUNT(*) AS count FROM party WHERE created_time BETWEEN %s AND %s",
+            'legal': "SELECT COUNT(*) AS count FROM legal WHERE created_time BETWEEN %s AND %s",
+            'master': "SELECT COUNT(*) AS count FROM master WHERE created_time BETWEEN %s AND %s",
+            'ocrdata': "SELECT COUNT(*) AS count FROM ocrdata WHERE qc_done_by = %s AND created_time BETWEEN %s AND %s"
+        }
+
+        # Daily and Monthly counts
+        for table, query in query_templates.items():
+            if table == 'ocrdata':
+                # Daily count for OCR data with QC filter
+                cursor.execute(query.replace('created_time BETWEEN %s AND %s', 'DATE(created_time) = %s'), 
+                               (username, today))
+                submissions_data[f'Todays QC Count'] = cursor.fetchone()['count']
+
+                # Monthly count for OCR data with QC filter
+                cursor.execute(query, (username, start_of_month, today))
+                submissions_data[f'Monthly QC Count'] = cursor.fetchone()['count']
+            else:
+                # Daily count for other tables
+                cursor.execute(query.replace('created_time BETWEEN %s AND %s', 'DATE(created_time) = %s'), 
+                               (today,))
+                submissions_data[f'Todays count for {table}'] = cursor.fetchone()['count']
+
+                # Monthly count for other tables
+                cursor.execute(query, (start_of_month, today))
+                submissions_data[f'Monthly count for {table}'] = cursor.fetchone()['count']
+    else:
+        # For specific roles (party, legal, master)
+        role_table = role  # role should match table name
+        query_template = f"SELECT COUNT(*) AS count FROM {role_table} WHERE username = %s AND created_time BETWEEN %s AND %s"
+
+        # Daily count
+        cursor.execute(query_template.replace('created_time BETWEEN %s AND %s', 'DATE(created_time) = %s'), 
+                       (username, today))
+        submissions_data[f'Todays_count'] = cursor.fetchone()['count']
+
+        # Monthly count
+        cursor.execute(query_template, (username, start_of_month, today))
+        submissions_data[f'Monthly_count'] = cursor.fetchone()['count']
+
+    conn.close()
+
+    return jsonify(submissions_data)
+
+
+@app.route('/get_new_updates')
+def get_new_updates():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        query = "SELECT content, created_by, created_time FROM updates ORDER BY created_time DESC LIMIT 10"
+        cursor.execute(query)
+        updates = cursor.fetchall()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+    return jsonify(updates)
 
 @app.route('/get_ocr_users', methods=['GET'])
 @login_required
@@ -741,7 +976,7 @@ def download_pdf():
         2.0 * inch   # QC Submission Time
     ]
 
-    # Define table styles
+    # Define table style
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),  # Header background

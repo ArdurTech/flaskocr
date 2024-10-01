@@ -8,7 +8,7 @@ def get_db_connection():
         user=current_app.config['MYSQL_USER'],
         password=current_app.config['MYSQL_PASSWORD'],
         database=current_app.config['MYSQL_DB'],
-        ssl={'ca': current_app.config['MYSQL_SSL_CA']}  # Use current_app for SSL configuration
+        # ssl={'ca': current_app.config['MYSQL_SSL_CA']}  # Use current_app for SSL configuration
     )
 
 def create_database_and_table():
@@ -16,7 +16,7 @@ def create_database_and_table():
         host=current_app.config['MYSQL_HOST'],
         user=current_app.config['MYSQL_USER'],
         password=current_app.config['MYSQL_PASSWORD'],
-        ssl={'ca': current_app.config['MYSQL_SSL_CA']}  # Use current_app for SSL configuration
+        # ssl={'ca': current_app.config['MYSQL_SSL_CA']}  # Use current_app for SSL configuration
     )
     cursor = connection.cursor()
 
@@ -52,7 +52,7 @@ def create_database_and_table():
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) UNIQUE,
             password_hash VARCHAR(255),
-            role ENUM('dataentry', 'qc', 'lead') DEFAULT 'dataentry'
+            role ENUM('party', 'legal', 'master', 'qc', 'lead') DEFAULT 'party'
         )
     """)
     
@@ -110,6 +110,16 @@ def create_database_and_table():
             instType TEXT,
             recordType TEXT,
             created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Create updates table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS updates (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            content TEXT NOT NULL,
+            created_by VARCHAR(255) NOT NULL,
+            created_time DATETIME NOT NULL
         )
     """)
 

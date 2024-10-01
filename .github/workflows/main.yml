@@ -43,12 +43,12 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name titleindex \
+            --application-name titleindexing \
             --version-label ${{ github.sha }} \
             --source-bundle S3Bucket=ardur,S3Key=deploy.zip \
             --region ${{ env.AWS_REGION }}
           aws elasticbeanstalk update-environment \
-            --application-name titleindex \
-            --environment-name Titleindex-env \
+            --application-name titleindexing \
+            --environment-name Titleindexing-env \
             --version-label ${{ github.sha }} \
             --region ${{ env.AWS_REGION }}

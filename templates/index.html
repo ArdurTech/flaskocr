@@ -1,228 +1,684 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArdurTech</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-
-<body>
-    <header>
-        <div class="header-left">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>ArdurTech</title>
+      <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+      <!-- <script src="{{ url_for('static', filename='js/index.js') }}"></script> -->
+   </head>
+   <body>
+      <header>
+         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
-        </div>
-        <h4>Data Entry</h4>
-        <div class="header-right">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username">{{ username }} ({{ role }})</span> <!-- Current role displayed here -->
+         </div>
+         <h4>Data Entry</h4>
+         <div class="header-right">
+            <!-- Current time display -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
-                <div class="dropdown-content">
-                    <button id="reviewButton" class="dropdown-button">DataEntry Report</button>
-                    <button id="logoutButton" class="logout-button">Logout</button>
-                </div>
+            <!-- Menu icon -->
+            <div class="menuIcon" onClick="toggleMenu()">☰</div>
+               <div class="dropdown-content">
+                  <button id="dashboardButton" class="dropdown-button">Dashboard</button>
+                  <button id="reviewButton" class="dropdown-button">DataEntry Report</button>
+                  <button id="logoutButton" class="logout-button">Logout</button>
+               </div>
             </div>
-        </div>
-    </header>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay">
-        <div>
+         </div>
+      </header>
+      <!-- Loading Overlay -->
+      <div id="loadingOverlay">
+         <div>
             <img src="{{ url_for('static', filename='logo/loading.gif') }}" alt="Loading">
             <p>Loading... Please wait</p>
-        </div>
-    </div>
-
-    <!-- Logout Confirmation Popup -->
-    <div id="logoutConfirmation" class="popup-overlay">
-        <div class="popup-content">
+         </div>
+      </div>
+      <!-- Logout Confirmation Popup -->
+      <div id="logoutConfirmation" class="popup-overlay">
+         <div class="popup-content">
             <p>Are you sure you want to logout?</p>
             <button id="confirmLogoutButton" class="popup-button">Logout</button>
             <button id="cancelLogoutButton" class="popup-button">Cancel</button>
+         </div>
+      </div>
+      <!-- Main Content -->
+      <div id="mainContent">
+      <div class="container">
+         <div id="canvasContainer">
+            <div id="browseButtonWrapper">
+               <label for="fileInput" class="choose-file-button">Browse</label>
+               <span id="fileName">No file selected</span>
+            </div>
+            <input type="file" id="fileInput" style="display: none;"> <!-- Hidden file input -->
+            <canvas id="leftCanvas"></canvas>
+         </div>
+         <div id="rightTextContainer">
+            <textarea id="extractedText" readonly></textarea>
+         </div>
+      </div>
+      <div id="sideNav">
+        <div class="button-group" id="buttonGroup">
+            {% if role == 'party' %}
+                <h2 id="partyHeader">DataEntry Party</h2>
+            {% elif role == 'legal' %}
+                <h2 id="legalHeader">DataEntry Legal</h2>
+            {% elif role == 'master' %}
+                <h2 id="masterHeader">DataEntry Master</h2>
+            {% elif role == 'qc' or role == 'lead' %}
+                <h2 id="deHeader">DataEntry</h2>
+                <!-- Add buttons or links to access each section -->
+                <button onclick="showFields('party')">Party </button>
+                <button onclick="showFields('legal')">Legal </button>
+                <button onclick="showFields('master')">Master </button>
+            {% endif %}
+            <button type="button" id="submitButton">Submit</button>
         </div>
-    </div>
-
-    <!-- Main Content -->
-    <div id="mainContent">
-        <div class="container">
-            <div id="canvasContainer">
-                <div id="browseButtonWrapper">
-                    <label for="fileInput" class="choose-file-button">Browse</label>
-                    <span id="fileName">No file selected</span>
-                </div>
-                <input type="file" id="fileInput" style="display: none;"> <!-- Hidden file input -->
-                <canvas id="leftCanvas"></canvas>
-            </div>
-            <div id="rightTextContainer">
-                <textarea id="extractedText" readonly></textarea>
-            </div>
-        </div>
-
-        <div id="sideNav">
-            <div class="button-group">
-                <button type="button" id="partyButton" onclick="showFields('party')">Party</button>
-                <button type="button" id="legalButton" onclick="showFields('legal')">Legal</button>
-                <button type="button" id="masterButton" onclick="showFields('master')">Master</button>
-                <button type="button" id="submitButton">Submit</button>
-            </div>
-
-            <div class="input-fields-container">
+    
+        <div class="input-fields-container">
             <div id="partyFields" class="input-fields" style="display: none;">
                 <div class="input-container">
-                    <input type="text" id="grantor" placeholder="Grantor">
-                    <button type="button" class="add-button" onclick="addInputField('party', 'grantor')">+</button>
+                    <!-- Dropdown for Grantor Prefixes -->
+                    <select id="grantorPrefix" title="Select a prefix" class="prefix-dropdown" onchange="setGrantorPrefix()">
+                        <option value="">Select Prefix</option>
+                        <option value="Jr">Jr</option>
+                        <option value="Sr">Sr</option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="MD">MD</option>
+                        <option value="DR">Dr</option>
+                        <option value="Attorney">Attorney</option>
+                        <option value="General Partner">General Partner</option>
+                        <option value="Managing Member">Managing Member</option>
+                        <option value="Member">Member</option>
+                        <option value="Partner">Partner</option>
+                        <option value="Treasurer">Treasurer</option>
+                        <option value="Mayor">Mayor</option>
+                        <option value="Nominee">Nominee</option>
+                    </select>
+                    <input type="text" id="grantor" placeholder="Grantor" class="grantor-input">
+                    <span class="icon" title="Flip" onclick="flipText('grantor')">⇆</span>
+                    <button type="button" class="add-button" title="Add Field" onclick="addInputField('party', 'grantor')">+</button>
                 </div>
+                <!-- Container for extra grantor inputs -->
+                <div id="grantorExtraFields" class="extra-inputs-container"></div>
+        
                 <div class="input-container">
-                    <input type="text" id="grantee" placeholder="Grantee">
-                    <button type="button" class="add-button" onclick="addInputField('party', 'grantee')">+</button>
+                    <!-- Dropdown for Grantee Prefixes -->
+                    <select id="granteePrefix" title="Select a prefix" class="prefix-dropdown" onchange="setGranteePrefix()">
+                        <option value="">Select Prefix</option>
+                        <option value="Jr">Jr</option>
+                        <option value="Sr">Sr</option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="MD">MD</option>
+                        <option value="DR">Dr</option>
+                        <option value="Attorney">Attorney</option>
+                        <option value="General Partner">General Partner</option>
+                        <option value="Managing Member">Managing Member</option>
+                        <option value="Member">Member</option>
+                        <option value="Partner">Partner</option>
+                        <option value="Treasurer">Treasurer</option>
+                        <option value="Mayor">Mayor</option>
+                        <option value="Nominee">Nominee</option>
+                    </select>
+                    <input type="text" id="grantee" placeholder="Grantee" class="grantee-input">
+                    <span class="icon" title="Flip" onclick="flipText('grantee')">⇆</span>
+                    <button type="button" class="add-button" title="Add Field" onclick="addInputField('party', 'grantee')">+</button>
                 </div>
+                <!-- Container for extra grantee inputs -->
+                <div id="granteeExtraFields" class="extra-inputs-container"></div>
                 <div class="input-container">
                     <input type="text" id="comment" placeholder="Comment">
-                    <button type="button" class="add-button" onclick="addInputField('party', 'comment')">+</button>
                 </div>
+
             </div>
-            
             <div id="legalFields" class="input-fields" style="display: none;">
-                <div class="input-container">
-                    <input type="text" id="subdivision" placeholder="Subdivision">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'subdivision')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="platnum" placeholder="Platnum">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'platnum')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="lot" placeholder="LOT">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'lot')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="block" placeholder="BLOCK">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'block')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="section" placeholder="SECTION">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'section')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="abstractName" placeholder="ABSTRACT_NAME">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'abstractName')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="abstSvy" placeholder="Abst_svy">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'abstSvy')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="acres" placeholder="Acres">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'acres')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="briefLegal" placeholder="Brief_legal">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'briefLegal')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="refDocs" placeholder="Ref_Docs">
-                    <button type="button" class="add-button" onclick="addInputField('legal', 'refDocs')">+</button>
-                </div>
+               <div class="input-container">
+                  <input type="text" id="subdivision" placeholder="Subdivision">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'subdivision')">+</button>
+               </div>
+               <!-- Container for extra subdivision inputs -->
+               <div id="subdivisionExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="platnum" placeholder="Platnum">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'platnum')">+</button>
+               </div>
+               <!-- Container for extra platnum inputs -->
+               <div id="platnumExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="lot" placeholder="LOT">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'lot')">+</button>
+               </div>
+               <!-- Container for extra lot inputs -->
+               <div id="lotExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="block" placeholder="BLOCK">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'block')">+</button>
+               </div>
+               <!-- Container for extra block inputs -->
+               <div id="blockExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="section" placeholder="SECTION">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'section')">+</button>
+               </div>
+               <!-- Container for extra section inputs -->
+               <div id="sectionExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="abstractName" placeholder="ABSTRACT_NAME">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'abstractName')">+</button>
+               </div>
+               <!-- Container for extra abstractName inputs -->
+               <div id="abstractNameExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="abstSvy" placeholder="Abst_svy">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'abstSvy')">+</button>
+               </div>
+               <!-- Container for extra abstSvy inputs -->
+               <div id="abstSvyExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="acres" placeholder="Acres">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'acres')">+</button>
+               </div>
+               <!-- Container for extra acres inputs -->
+               <div id="acresExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="briefLegal" placeholder="Brief_legal">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'briefLegal')">+</button>
+               </div>
+               <!-- Container for extra briefLegal inputs -->
+               <div id="briefLegalExtraFields" class="extra-inputs-container"></div>
+               <div class="input-container">
+                  <input type="text" id="refDocs" placeholder="Ref_Docs">
+                   <button type="button" class="add-button" title="Add_Field" onclick="addInputField('legal', 'refDocs')">+</button>
+               </div>
+               <!-- Container for extra refDocs inputs -->
+               <div id="refDocsExtraFields" class="extra-inputs-container"></div>
             </div>
-        
             <div id="masterFields" class="input-fields" style="display: none;">
-                <div class="input-container">
-                    <input type="text" id="bookType" placeholder="Book_type">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'bookType')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="instrumentType" placeholder="Instrument_type">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'instrumentType')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="remarks" placeholder="Remarks">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'remarks')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="instNo" placeholder="Inst. No.">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'instNo')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="caseNo" placeholder="Case_no.">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'caseNo')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="volume" placeholder="Volume">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'volume')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="page" placeholder="Page">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'page')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="instrumentDate" placeholder="Instrument Date">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'instrumentDate')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="fillingDate" placeholder="Filling Date">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'fillingDate')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="consideration" placeholder="Consideration">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'consideration')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="userComment" placeholder="User Comment">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'userComment')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="instType" placeholder="Inst Type">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'instType')">+</button>
-                </div>
-                <div class="input-container">
-                    <input type="text" id="recordType" placeholder="Record type">
-                    <button type="button" class="add-button" onclick="addInputField('master', 'recordType')">+</button>
-                </div>
+               <div class="input-container">
+                  <input type="text" id="bookType" placeholder="Book_type">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="instrumentType" placeholder="Instrument_type">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="remarks" placeholder="Remarks">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="instNo" placeholder="Inst. No.">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="caseNo" placeholder="Case_no.">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="volume" placeholder="Volume">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="page" placeholder="Page">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="instrumentDate" placeholder="Instrument Date">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="fillingDate" placeholder="Filling Date">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="consideration" placeholder="Consideration">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="userComment" placeholder="User Comment">
+               </div>
+               <div class="input-container">
+                  <input type="text" id="instType" placeholder="Inst Type">
+               </div>  
+               <div class="input-container">
+                  <input type="text" id="recordType" placeholder="Record type">
+               </div>
             </div>
-            </div>
-        
+         </div>
+         
 
-        <script>
-            let scale = 1;
-            let originX = 0;
-            let originY = 0;
-            let isDragging = false;
-            let lastX, lastY;
-            let imgWidth, imgHeight;
-            let imageObj;
-            let filepath = '';
+         <script>
+                let scale = 1;
+                let originX = 0;
+                let originY = 0;
+                let isDragging = false;
+                let lastX, lastY;
+                let imgWidth, imgHeight;
+                let imageObj;
+                let filepath = '';
 
-            function addInputField(section, id) {
-            const inputContainer = document.createElement('div');
-            inputContainer.className = 'input-container';
-            
-            const newInput = document.createElement('input');
-            newInput.type = 'text';
-            newInput.placeholder = document.getElementById(id).placeholder;
+                const userRole = "{{ role }}";  // Passing the role variable from Flask
+                
+                // Add new input field dynamically
+                function addInputField(section, id) {
+                    const currentInput = document.getElementById(id); // Get the current input field
+                    const currentInputContainer = currentInput.parentNode; // Get the current input's container
 
-            const addButton = document.createElement('button');
-            addButton.type = 'button';
-            addButton.className = 'add-button';
-            addButton.textContent = '+';
-            addButton.onclick = function() {
-                addInputField(section, id);
-            };
+                    // Determine the correct extra input container
+                    const extraInputContainer = document.getElementById(id + 'ExtraFields');
 
-            inputContainer.appendChild(newInput);
-            inputContainer.appendChild(addButton);
+                    // Create a new input container div
+                    const inputContainer = document.createElement('div');
+                    inputContainer.className = 'input-container';
 
-            // Insert the new container just below the last added input/button container
-            const currentInputContainer = document.getElementById(id).parentNode; // Get the parent container of the current input
-            currentInputContainer.parentNode.insertBefore(inputContainer, currentInputContainer.nextSibling);
+                    // Create the new input field
+                    const newInput = document.createElement('input');
+                    newInput.type = 'text';
+                    newInput.placeholder = currentInput.placeholder; // Set placeholder same as current field
+                    newInput.id = `${id}_new_${Date.now()}`; // Unique ID
+                    newInput.className = 'extra-input'; // Add class for easy removal
 
-            document.getElementById(`${section}Fields`).appendChild(inputContainer);
+                    // Append the new input to its container
+                    inputContainer.appendChild(newInput);
 
-            // Add event listener for formatting on the new input field
-            newInput.addEventListener('input', function() {
-                const selectedText = window.getSelection().toString();
-                if (selectedText) {
-                    const cleanedText = selectedText.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
+                    // Append the input container to the designated extra input container
+                    extraInputContainer.appendChild(inputContainer);
+
+                    // Log the new input ID
+                    console.log(`New input field added with ID: ${newInput.id}`);
+
+                    // If 'grantor', add flip icon
+                    if (id === 'grantor','grantee') {
+                        const flipIcon = document.createElement('span');
+                        flipIcon.className = 'icon';
+                        flipIcon.title = 'Flip';
+                        flipIcon.textContent = '⇆';
+                        flipIcon.onclick = () => flipText(newInput.id);
+                        inputContainer.appendChild(flipIcon);
+                    }
+
+                    // Add "+" button for additional fields
+                    const addButton = document.createElement('button');
+                    addButton.type = 'button';
+                    addButton.className = 'add-button';
+                    addButton.textContent = '+';
+                    addButton.title = 'Add Field';
+                    addButton.onclick = () => addInputField(section, id);
+                    inputContainer.appendChild(addButton);
+
+                    // Add "-" button to remove field
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'remove-button';
+                    removeButton.textContent = '-';
+                    removeButton.title = 'Remove Field';
+                    removeButton.onclick = () => removeInputField(removeButton);
+                    inputContainer.appendChild(removeButton);
+
+                    // Insert new container below the current one
+                    currentInputContainer.parentNode.insertBefore(inputContainer, currentInputContainer.nextSibling);
+
+                    // Add formatting event for the new input field
+                    newInput.addEventListener('input', formatInput);
+                }
+
+                // Format input by removing special characters and rearranging name
+                function formatInput(event) {
+                    const selectedText = window.getSelection().toString();
+                    if (selectedText) {
+                        const cleanedText = selectedText.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
+                        const nameParts = cleanedText.split(/\s+/); // Split by spaces
+
+                        if (nameParts.length >= 2) {
+                            const firstName = nameParts[0];
+                            const lastName = nameParts[nameParts.length - 1];
+                            const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+
+                            const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
+                            event.target.value = formattedName;
+                        } else {
+                            event.target.value = cleanedText; // Fallback for short names
+                        }
+                    }
+                }
+
+                // Flip name order for two or three words
+                function flipText(inputId) {
+                    const inputField = document.getElementById(inputId);
+                    const currentText = inputField.value.trim();
+
+                    if (currentText) {
+                        const nameParts = currentText.split(/\s+/);
+
+                        if (nameParts.length === 3) {
+                            const formattedName = `${nameParts[1]} ${nameParts[2]} ${nameParts[0]}`;
+                            inputField.value = formattedName;
+                        } else if (nameParts.length === 2) {
+                            const formattedName = `${nameParts[1]} ${nameParts[0]}`;
+                            inputField.value = formattedName;
+                        } else {
+                            alert("Please enter exactly two or three names.");
+                        }
+                    } else {
+                        alert("The input field is empty.");
+                    }
+                }
+
+                // Remove a dynamically added input field
+                function removeInputField(button) {
+                    const inputContainer = button.closest('.input-container');
+                    if (inputContainer.parentNode.childElementCount > 1) {
+                        inputContainer.remove(); // Only remove if more than one input exists
+                    }
+                }
+
+                // Show fields based on the selected section
+                function showFields(section) {
+                    document.querySelectorAll('.input-fields').forEach(div => div.style.display = 'none');
+
+                    const sectionId = `${section}Fields`;
+                    const sectionDiv = document.getElementById(sectionId);
+
+                    if (sectionDiv) {
+                        sectionDiv.style.display = 'block';
+                    }
+                }
+
+                // Handle file upload and image display
+                document.getElementById('fileInput').addEventListener('change', function(event) {
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    document.getElementById('mainContent').classList.add('blur-background');
+
+                    const file = event.target.files[0];
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    document.getElementById('fileName').textContent = file.name;
+
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        document.getElementById('mainContent').classList.remove('blur-background');
+
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            document.getElementById('sideNav').style.display = 'block';
+                            document.getElementById('extractedText').value = data.text;
+
+                            const leftCanvas = document.getElementById('leftCanvas');
+                            const ctxLeft = leftCanvas.getContext('2d');
+                            const imageObj = new Image();
+
+                            imageObj.onload = function() {
+                                const imgWidth = imageObj.width;
+                                const imgHeight = imageObj.height;
+                                leftCanvas.width = imgWidth;
+                                leftCanvas.height = imgHeight;
+                                ctxLeft.drawImage(imageObj, 0, 0);
+                            };
+
+                            imageObj.src = 'data:image/png;base64,' + data.image;
+                            filepath = data.filepath;
+                        }
+
+                        showFields(userRole);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error uploading file');
+                    });
+                });
+
+                // Check if any input field is filled
+                function checkInputsFilled() {
+                    const inputs = document.querySelectorAll('#sideNav input[type="text"]');
+                    let anyFieldFilled = false;
+
+                    for (let input of inputs) {
+                        if (input.value) {
+                            anyFieldFilled = true;
+                            break;
+                        }
+                    }
+
+                    document.getElementById('submitButton').disabled = !anyFieldFilled;
+                }
+
+                // Handle form submission
+                document.getElementById('submitButton').addEventListener('click', function() {
+                    const selectedSection = document.querySelector('#sideNav .input-fields[style*="display: block"]').id.replace('Fields', '');
+                    const data = {
+                        selectedSection: selectedSection,
+                        filePath: filepath,
+                        username: '{{ username }}'
+                    };
+
+                    // Map to hold combined input values
+                    let grantorValues = [];
+                    let granteeValues = [];
+                    let commentValues = [];
+                    let subdivisionValues = [];
+                    let platnumValues = [];
+                    let lotValues = [];
+                    let blockValues = [];
+                    let sectionValues = [];
+                    let abstractNameValues = [];
+                    let abstSvyValues = [];
+                    let acresValues = [];
+                    let briefLegalValues = [];
+                    let refDocsValues = [];
+                    let masterValues = {};
+
+                    // Collect values from relevant inputs based on the selected section
+                    if (selectedSection === 'party') {
+                        // Collect values for grantor and grantee
+                        document.querySelectorAll('#partyFields input[type="text"]').forEach(input => {
+                            const inputId = input.id;
+                            let inputValue = input.value.trim();
+
+                            if (inputValue) {
+                                if (inputId.startsWith('grantor')) {
+                                    grantorValues.push(inputValue);
+                                } else if (inputId.startsWith('grantee')) {
+                                    granteeValues.push(inputValue);
+                                } else if (inputId.startsWith('comment')) {
+                                    commentValues.push(inputValue);
+                                }
+                            }
+                        });
+                        // Convert grantor and grantee values to strings separated by '|'
+                        const grantorCombined = grantorValues.join('|');
+                        const granteeCombined = granteeValues.join('|');
+                        const commentCombined = commentValues.join('|');
+
+                        // Log the combined values for debugging purposes
+                        console.log('Grantor Combined:', grantorCombined);
+                        console.log('Grantee Combined:', granteeCombined);
+                        console.log('Comment Combined:', commentCombined);
+
+                        // Attach combined values to your data object for submission
+                        data['grantor'] = grantorCombined;
+                        data['grantee'] = granteeCombined;
+                        data['comment'] = commentCombined;
+
+                    } else if (selectedSection === 'legal') {
+                        // Collect legal section inputs
+                        document.querySelectorAll('#legalFields input[type="text"]').forEach(input => {
+                            const inputId = input.id;
+                            let inputValue = input.value.trim();
+
+                            if (inputValue) {
+                                if (inputId.startsWith('subdivision')) {
+                                    subdivisionValues.push(inputValue);
+                                } else if (inputId.startsWith('platnum')) {
+                                    platnumValues.push(inputValue);
+                                }  else if (inputId.startsWith('lot')) {
+                                    lotValues.push(inputValue);
+                                } else if (inputId.startsWith('block')) {
+                                    blockValues.push(inputValue);
+                                } else if (inputId.startsWith('section')) {
+                                    sectionValues.push(inputValue);
+                                } else if (inputId.startsWith('abstractName')) {
+                                    abstractNameValues.push(inputValue);
+                                } else if (inputId.startsWith('abstSvy')) {
+                                    abstSvyValues.push(inputValue);
+                                } else if (inputId.startsWith('acres')) {
+                                    acresValues.push(inputValue);
+                                } else if (inputId.startsWith('briefLegal')) {
+                                    briefLegalValues.push(inputValue);
+                                } else if (inputId.startsWith('refDocs')) {
+                                    refDocsValues.push(inputValue);
+                                }
+                            }
+                        });
+                        // Convert input values to strings separated by '|'
+                        const subdivisionCombined = subdivisionValues.join('|');
+                        const platnumCombined = platnumValues.join('|');
+                        const lotCombined = lotValues.join('|');
+                        const blockCombined = blockValues.join('|');
+                        const sectionCombined = sectionValues.join('|');
+                        const abstractNameCombined = abstractNameValues.join('|');
+                        const abstSvyCombined = abstSvyValues.join('|');
+                        const acresCombined = acresValues.join('|');
+                        const briefLegalCombined = briefLegalValues.join('|');
+                        const refDocsCombined = refDocsValues.join('|');
+
+                        // Log the combined values for debugging purposes
+                        console.log('subdivision Combined:', subdivisionCombined);
+                        console.log('platnum Combined:', platnumCombined);
+                        console.log(' lot Combined:', lotCombined);
+                        console.log('block Combined:', blockCombined);
+                        console.log('section Combined:', sectionCombined);
+                        console.log('abstractName Combined:', abstractNameCombined);
+                        console.log('abstSvy Combined:', abstSvyCombined);
+                        console.log('acres Combined:', acresCombined);
+                        console.log('briefLegal Combined:', briefLegalCombined);
+                        console.log('refDocs Combined:', refDocsCombined);
+
+                        // Attach combined values to your data object for submission
+                        data['subdivision'] = subdivisionCombined;
+                        data['platnum'] = platnumCombined;
+                        data['lot'] = lotCombined;
+                        data['block'] = blockCombined;
+                        data['section'] = sectionCombined;
+                        data['abstractName'] = abstractNameCombined;
+                        data['abstSvy'] = abstSvyCombined;
+                        data['acres'] = acresCombined;
+                        data['briefLegal'] = briefLegalCombined;
+                        data['refDocs'] = refDocsCombined;
+
+                    } else if (selectedSection === 'master') {
+                        // Collect master section inputs directly into the data object
+                        const masterFields = [
+                            'bookType', 'instrumentType', 'remarks', 'instNo',
+                            'caseNo', 'volume', 'page', 'instrumentDate',
+                            'fillingDate', 'consideration', 'userComment', 
+                            'instType', 'recordType'
+                        ];
+
+                        // Iterate through the master fields to collect their values
+                        masterFields.forEach(field => {
+                            const inputValue = document.getElementById(field).value.trim(); // Get the value and trim whitespace
+                            if (inputValue) {
+                                data[field] = inputValue; // Attach each input value directly to the data object
+                            }
+                        });
+
+                        console.log('Master Values:', data); // Log the entire data object for debugging
+                    }
+                    // Post the data to the backend
+                    fetch('/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        console.log('Response:', responseData);
+
+                        if (responseData.success) {
+                         // Clear inputs for the selected section
+                        document.querySelectorAll(`#${selectedSection}Fields input[type="text"]`).forEach(input => input.value = '');
+
+                    // Remove any extra dynamically added fields and associated icons (+, -, flip)
+                    document.querySelectorAll('.extra-input').forEach(extraInput => {
+                        // Find the parent element containing the input and associated icons
+                        const parent = extraInput.parentElement;
+
+                        // Remove the entire parent element, which includes input, +/-, flip icons
+                        parent.remove();
+                    });
+
+                        // Display success message
+                        alert('Submission successful!');
+
+                        // Clear the extracted text area
+                        document.getElementById('extractedText').value = '';
+
+                        // Clear the filename display
+                        document.getElementById('fileName').textContent = '';
+
+                        // Clear the canvas (left canvas assumed)
+                        const leftCanvas = document.getElementById('leftCanvas');
+                        const ctxLeft = leftCanvas.getContext('2d');
+                        ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height); // Clear the entire canvas
+
+                        // Disable the submit button
+                        document.getElementById('submitButton').disabled = true;
+
+                        // Optionally, reset filepath if needed
+                        filepath = '';
+
+                        // Remove all dynamically added input fields
+                        const extraInputs = document.querySelectorAll('.extra-input');
+                        extraInputs.forEach(input => {
+                            input.parentElement.remove(); // Remove the input field and its associated label, if applicable
+                        });
+
+                        // Optionally, reset other fields or variables related to the submission
+                        // Example: Reset form states, disable other buttons, etc.
+                        // Open the file input dialog again
+                    const fileInput = document.getElementById('fileInput'); // Ensure you have the correct ID for your file input
+                    fileInput.value = ''; // Clear the input to allow for a new file selection
+                    fileInput.click(); // Trigger the file input click to open the file dialog
+                    } else {
+                        // Handle error response from server
+                        console.error('Submission failed:', responseData.error);
+                        alert(responseData.error || 'An error occurred during submission.');
+                    }
+                                        })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting data');
+                    });
+                });
+
+
+
+
+                // Handle text selection (drag/drop) and copy-paste
+                document.querySelectorAll('#sideNav input[type="text"]').forEach(function(input) {
+                    input.addEventListener('input', checkInputsFilled);
+
+                    input.addEventListener('input', function() {
+                        const selectedText = window.getSelection().toString();
+                        if (selectedText && document.activeElement === document.getElementById('grantor')) {
+                            formatAndSetGrantorText(selectedText, input);
+                        }
+                    });
+
+                    input.addEventListener('paste', function(event) {
+                        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+                        if (document.activeElement === document.getElementById('grantor')) {
+                            event.preventDefault(); // Prevent the default paste behavior
+                            formatAndSetGrantorText(pastedText, input);
+                        }
+                    });
+                });
+
+                function formatAndSetGrantorText(text, input) {
+                    const cleanedText = text.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
                     const nameParts = cleanedText.split(/\s+/);
 
                     if (nameParts.length >= 2) {
@@ -231,223 +687,190 @@
                         const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
 
                         const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
-                        newInput.value = formattedName;
+                        input.value = formattedName;
                     } else {
-                        newInput.value = cleanedText; // Fallback
-                    }
-                }
-            });
-        }
-
-
-        function showFields(section) {
-            document.querySelectorAll('.input-fields').forEach(div => div.style.display = 'none');
-            document.getElementById(`${section}Fields`).style.display = 'block';
-        }
-
-            document.getElementById('fileInput').addEventListener('change', function (event) {
-                document.getElementById('loadingOverlay').style.display = 'flex';
-                document.getElementById('mainContent').classList.add('blur-background');
-
-                const file = event.target.files[0];
-                const formData = new FormData();
-                formData.append('file', file);
-
-                document.getElementById('fileName').textContent = file.name;
-
-                fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('extractedText').value = data.text;
-                        document.getElementById('loadingOverlay').style.display = 'none';
-                        document.getElementById('mainContent').classList.remove('blur-background');
-
-                        if (data.error) {
-                            alert(data.error);
-                        } else {
-                            const leftCanvas = document.getElementById('leftCanvas');
-                            const ctxLeft = leftCanvas.getContext('2d');
-                            imageObj = new Image();
-
-                            imageObj.onload = function () {
-                                imgWidth = imageObj.width;
-                                imgHeight = imageObj.height;
-                                leftCanvas.width = imgWidth;
-                                leftCanvas.height = imgHeight;
-                                ctxLeft.drawImage(imageObj, 0, 0);
-                            };
-                            imageObj.src = 'data:image/png;base64,' + data.image;
-                            filepath = data.filepath;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error uploading file');
-                    });
-            });
-
-            function showFields(type) {
-                document.querySelectorAll('.input-fields').forEach(function (fieldSet) {
-                    fieldSet.style.display = 'none';
-                });
-
-                if (type === 'party') {
-                    document.getElementById('partyFields').style.display = 'block';
-                } else if (type === 'legal') {
-                    document.getElementById('legalFields').style.display = 'block';
-                } else if (type === 'master') {
-                    document.getElementById('masterFields').style.display = 'block';
-                }
-
-                checkInputsFilled();
-            }
-
-            function checkInputsFilled() {
-                const inputs = document.querySelectorAll('#sideNav input[type="text"]');
-                let anyFieldFilled = false;
-
-                for (let input of inputs) {
-                    if (input.value) {
-                        anyFieldFilled = true;
-                        break;
+                        input.value = cleanedText; // Fallback if not enough parts
                     }
                 }
 
-                document.getElementById('submitButton').disabled = !anyFieldFilled;
-            }
+                document.addEventListener('DOMContentLoaded', function() {
 
-            document.getElementById('submitButton').addEventListener('click', function () {
-                const selectedSection = document.querySelector('#sideNav .input-fields[style*="display: block"]').id.replace('Fields', '');
-                const inputs = document.querySelectorAll(`#${selectedSection}Fields input[type="text"]`);
-                const data = {
-                    selectedSection: selectedSection,
-                    filePath: filepath,
-                    username: '{{ username }}'
-                };
+                    const userRole = '{{ role }}'; // Use the role from your Flask context
+                    showFields(userRole); // Show fields based on the user's role when the page loads
 
-                inputs.forEach(input => {
-                    data[input.id] = input.value;
-                });
+                    // Initially hide the side navigation
+                    document.getElementById('sideNav').style.display = 'none';
 
-                fetch('/submit', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Submission successful!');
-                            inputs.forEach(input => {
-                                input.value = '';
+                    // Add event listener for file input change
+                    document.getElementById('fileInput').addEventListener('change', function(event) {
+                        document.getElementById('loadingOverlay').style.display = 'flex';
+                        document.getElementById('mainContent').classList.add('blur-background');
+
+                        const file = event.target.files[0];
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        document.getElementById('fileName').textContent = file.name;
+
+                        fetch('/upload', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('loadingOverlay').style.display = 'none';
+                                document.getElementById('mainContent').classList.remove('blur-background');
+
+                                if (data.error) {
+                                    alert(data.error);
+                                } else {
+                                    // Show the side navigation after file upload
+                                    document.getElementById('sideNav').style.display = 'block';
+                                    document.getElementById('extractedText').value = data.text;
+
+                                    const leftCanvas = document.getElementById('leftCanvas');
+                                    const ctxLeft = leftCanvas.getContext('2d');
+                                    imageObj = new Image();
+
+                                    imageObj.onload = function() {
+                                        imgWidth = imageObj.width;
+                                        imgHeight = imageObj.height;
+                                        leftCanvas.width = imgWidth;
+                                        leftCanvas.height = imgHeight;
+                                        ctxLeft.drawImage(imageObj, 0, 0);
+                                    };
+                                    imageObj.src = 'data:image/png;base64,' + data.image;
+                                    filepath = data.filepath;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error uploading file');
                             });
-                            document.getElementById('submitButton').disabled = true;
-                        } else {
-                            alert(data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error submitting data');
                     });
-            });
-            document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
-            // Handle text selection (drag/drop)
-            input.addEventListener('input', function() {
-                const selectedText = window.getSelection().toString();
-                if (selectedText && document.activeElement === document.getElementById('grantor')) {
-                    formatAndSetGrantorText(selectedText, input);
-                }
-            });
 
-            // Handle copy-paste
-            input.addEventListener('paste', function(event) {
-                const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-                if (document.activeElement === document.getElementById('grantor')) {
-                    event.preventDefault(); // Prevent the default paste behavior
-                    formatAndSetGrantorText(pastedText, input);
-                }
-            });
-        });
+                    // Add event listener for the logout button
+                    const logoutButton = document.getElementById('logoutButton');
+                    const logoutConfirmation = document.getElementById('logoutConfirmation');
+                    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
+                    const cancelLogoutButton = document.getElementById('cancelLogoutButton');
 
-        function formatAndSetGrantorText(text, input) {
-            const cleanedText = text.replace(/[^a-zA-Z\s]/g, ' ').trim(); // Remove special characters
-            const nameParts = cleanedText.split(/\s+/);
+                    if (logoutButton) {
+                        logoutButton.addEventListener('click', function() {
+                            logoutConfirmation.style.display = 'flex'; // Show the popup
+                        });
+                    }
 
-            if (nameParts.length >= 2) {
-                const firstName = nameParts[0];
-                const lastName = nameParts[nameParts.length - 1];
-                const middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+                    if (confirmLogoutButton) {
+                        confirmLogoutButton.addEventListener('click', function() {
+                            window.location.href = "{{ url_for('logout') }}"; // Ensure this matches your Flask route
+                        });
+                    }
 
-                const formattedName = `${lastName} ${firstName} ${middleName}`.trim(); // Format to "lastname firstname middle name"
-                input.value = formattedName;
-            } else {
-                input.value = cleanedText; // Fallback if not enough parts
-            }
-        }
+                    if (cancelLogoutButton) {
+                        cancelLogoutButton.addEventListener('click', function() {
+                            logoutConfirmation.style.display = 'none'; // Hide the popup
+                        });
+                    }
+
+                    // Review button event listener
+                    document.getElementById('reviewButton').addEventListener('click', function() {
+                        window.location.href = "{{ url_for('review') }}"; // Ensure this matches your Flask route
+                    });
+
+                    document.getElementById('dashboardButton').addEventListener('click', function() {
+                        window.location.href = "{{ url_for('dashboard') }}"; // Ensure this matches your Flask route
+                    });
+
+                });
 
 
-            document.querySelectorAll('#sideNav input[type="text"]').forEach(function (input) {
-                input.addEventListener('input', checkInputsFilled);
-            });
+                // Canvas functionality
+                const leftCanvas = document.getElementById('leftCanvas');
 
-            document.getElementById('logoutButton').addEventListener('click', function () {
-                document.getElementById('logoutConfirmation').style.display = 'block';
-            });
-
-            document.getElementById('confirmLogoutButton').addEventListener('click', function () {
-                window.location.href = '/logout';
-            });
-            document.getElementById('cancelLogoutButton').addEventListener('click', function () {
-                document.getElementById('logoutConfirmation').style.display = 'none';
-            });
-
-            const leftCanvas = document.getElementById('leftCanvas');
-            leftCanvas.addEventListener('mousedown', function (e) {
-                isDragging = true;
-                lastX = e.offsetX;
-                lastY = e.offsetY;
-            });
-
-            leftCanvas.addEventListener('mousemove', function (e) {
-                if (isDragging) {
-                    const dx = e.offsetX - lastX;
-                    const dy = e.offsetY - lastY;
-                    originX += dx;
-                    originY += dy;
+                leftCanvas.addEventListener('mousedown', function(e) {
+                    isDragging = true;
                     lastX = e.offsetX;
                     lastY = e.offsetY;
+                });
+
+                leftCanvas.addEventListener('mousemove', function(e) {
+                    if (isDragging) {
+                        const dx = e.offsetX - lastX;
+                        const dy = e.offsetY - lastY;
+                        originX += dx;
+                        originY += dy;
+                        lastX = e.offsetX;
+                        lastY = e.offsetY;
+                        drawCanvas();
+                    }
+                });
+
+                leftCanvas.addEventListener('mouseup', function() {
+                    isDragging = false;
+                });
+
+                leftCanvas.addEventListener('mouseleave', function() {
+                    isDragging = false;
+                });
+
+                leftCanvas.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                    scale += e.deltaY * -0.001;
+                    scale = Math.min(Math.max(0.5, scale), 4);
                     drawCanvas();
+                });
+
+                function drawCanvas() {
+                    const ctxLeft = leftCanvas.getContext('2d');
+                    ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
+                    ctxLeft.drawImage(imageObj, originX, originY, imgWidth * scale, imgHeight * scale);
                 }
-            });
+                document.addEventListener('keydown', function(event) {
+                    // Check if Ctrl (or Cmd on Mac) is pressed along with S
+                    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                        event.preventDefault(); // Prevent the default save action
+                        document.getElementById('submitButton').click(); // Programmatically click the submit button
+                    }
+                });
 
-            leftCanvas.addEventListener('mouseup', function () {
-                isDragging = false;
-            });
+                // Fetch current time and update in the header without seconds
+                function showCurrentTime() {
+                    const currentTimeElement = document.getElementById('currentTime');
+                    const now = new Date();
+                    const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+                    currentTimeElement.textContent = now.toLocaleTimeString([], options);
+                }
+                showCurrentTime();
+                setInterval(showCurrentTime, 1000); // Update time every second
 
-            leftCanvas.addEventListener('mouseleave', function () {
-                isDragging = false;
-            });
+                document.querySelector('.dropdown').addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent click event from bubbling up
+                    this.querySelector('.dropdown-content').classList.toggle('show'); // Toggle visibility
+                });
 
-            leftCanvas.addEventListener('wheel', function (e) {
-                e.preventDefault();
-                scale += e.deltaY * -0.001;
-                scale = Math.min(Math.max(0.5, scale), 4);
-                drawCanvas();
-            });
-
-            function drawCanvas() {
+                // Close dropdown if the user clicks outside of it
+                window.onclick = function(event) {
+                    if (!event.target.matches('.dropdown') && !event.target.matches('#userIcon') && !event.target.matches('#username')) {
+                        var dropdowns = document.getElementsByClassName('dropdown-content');
+                        for (var i = 0; i < dropdowns.length; i++) {
+                            var openDropdown = dropdowns[i];
+                            if (openDropdown.classList.contains('show')) {
+                                openDropdown.classList.remove('show');
+                            }
+                        }
+                    }
+                };
+                function redrawCanvas() {
+                const leftCanvas = document.getElementById('leftCanvas');
                 const ctxLeft = leftCanvas.getContext('2d');
                 ctxLeft.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
-                ctxLeft.drawImage(imageObj, originX, originY, imgWidth * scale, imgHeight * scale);
+                ctxLeft.save();
+                ctxLeft.translate(originX, originY);
+                ctxLeft.scale(scale, scale);
+                ctxLeft.drawImage(imageObj, 0, 0);
+                ctxLeft.restore();
             }
-        </script>
-    </div>
-</body>
-
+         </script>
+   </body>
 </html>

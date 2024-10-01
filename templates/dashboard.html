@@ -10,20 +10,55 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username">{{ username }} ({{ role }})</span> <!-- Current role displayed here -->
+        </div>
+        <h4>Dashboard</h4>
+        <div class="header-right">
+            <!-- Current time display -->
+            <span id="currentTime" class="current-time"></span>
+            <div class="dropdown">
+            <!-- Menu icon -->
+            <div class="menuIcon" onClick="toggleMenu()">☰</div>
+            <div class="dropdown-content">
+                <a href="#" id="partyButton" class="dropdown-button">DE_Party</a>
+                <a href="#" id="legalButton" class="dropdown-button">DE_Legal</a>
+                <a href="#" id="masterButton" class="dropdown-button">DE_Master</a>
+                <a href="#" id="qcButton" class="dropdown-button">QC</a>
+                <a href="#" id="leadButton" class="dropdown-button">Lead</a>
+                    <button id="logoutButton" class="logout-button">Logout</button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div id="mainContent">
-        <div class="container" id="dataEntryContainer">
-            <button class="action-button" id="dataEntryButton">Data Entry</button>
+    <main>
+        <div class="dashboard-content">
+            <!-- Unified Updates Container -->
+            <div class="card-container">
+                <!-- Recent Work Updates Card -->
+                <div class="card">
+                    <h2>Recent Work Updates</h2>
+                    <ul id="recentUpdatesList" class="updates-list">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+    
+                <!-- New Updates Card -->
+                <div class="card">
+                    <h2>New Updates</h2>
+                    <ul id="newUpdatesList" class="updates-list">
+                        <!-- Populated dynamically -->
+                    </ul>
+                    <button id="refreshUpdatesButton">Refresh Updates</button> <!-- Refresh button -->
+                </div>
+            </div>
         </div>
-        <div class="container" id="qcContainer">
-            <button class="action-button" id="qcButton">QC</button>
-        </div>
-        <div class="container" id="leadContainer">
-            <button class="action-button" id="leadButton">Lead</button>
-        </div>
-    </div>
+    </main>
+    
+    
+    
 
     <!-- Modal popup for showing errors -->
     <div id="errorModal" class="modal">
@@ -33,64 +68,260 @@
         </div>
     </div>
 
+    <!-- Logout Confirmation Popup -->
+    <div id="logoutConfirmation" class="popup-overlay">
+        <div class="popup-content">
+            <p>Are you sure you want to logout?</p>
+            <button id="confirmLogoutButton" class="popup-button">Logout</button>
+            <button id="cancelLogoutButton" class="popup-button">Cancel</button>
+        </div>
+    </div>
+
     <script>
-        // Get the modal
-        var modal = document.getElementById("errorModal");
+        document.addEventListener('DOMContentLoaded', function () {
+        fetchUpdates();
 
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
+        function fetchUpdates() {
+            fetch('/get_updates') // Call the backend route
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const recentUpdatesList = document.getElementById('recentUpdatesList');
+                    recentUpdatesList.innerHTML = ''; // Clear previous updates
 
-        // Close the modal when the user clicks on <span> (x)
-        span.onclick = function() {
-            modal.style.display = "none";
+                    for (const [key, value] of Object.entries(data)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${formatKey(key)}: ${value}`;
+                        recentUpdatesList.appendChild(listItem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching updates:', error);
+                });
         }
 
-        // Close the modal when the user clicks anywhere outside of the modal
-        window.onclick = function(event) {
-            if (event.target == modal) {
+        function fetchNewUpdates() {
+        fetch('/get_new_updates') // Call the backend route to get new updates
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const newUpdatesList = document.getElementById('newUpdatesList');
+                newUpdatesList.innerHTML = ''; // Clear previous new updates
+
+                const today = new Date();
+                data.forEach(update => {
+                    const updateDate = new Date(update.created_time);
+                    
+                    // Check if the update is from today
+                    if (updateDate.toDateString() === today.toDateString()) {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <div class="update-content">${update.content}</div>
+                            <div class="update-meta">Posted by ${update.created_by} on ${update.created_time}</div>
+                        `;
+                        newUpdatesList.appendChild(listItem);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching new updates:', error);
+            });
+    }
+
+
+        // You can add a button to trigger fetchNewUpdates manually if desired
+        document.getElementById('refreshUpdatesButton').addEventListener('click', fetchNewUpdates);
+
+
+            // Format the key to be more readable, if needed
+            function formatKey(key) {
+                return key
+                    .replace(/_/g, ' ') // Replace underscores with spaces
+                    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize the first letter of each word
+            }
+    
+
+            // Function to update the current time every second in 12-hour format
+            function updateTime() {
+                const currentTimeElement = document.getElementById('currentTime');
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+
+                // Convert hours to 12-hour format
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+
+                currentTimeElement.textContent = `${hours}:${minutes} ${ampm}`;
+            }
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+            updateTime(); // Initial call to display time immediately
+            
+            // Modal logic
+            var modal = document.getElementById("errorModal");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close")[0];
+
+            // Close the modal when the user clicks on <span> (x)
+            span.onclick = function() {
                 modal.style.display = "none";
             }
-        }
 
-        function showAccessDenied(message) {
-            document.getElementById('modalMessage').innerText = message;
-            modal.style.display = "block";
-        }
+            // Close the modal when the user clicks anywhere outside of the modal
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
 
-        document.getElementById('dataEntryButton').addEventListener('click', function() {
-            fetch('{{ url_for("check_role_access", role="dataentry") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.access) {
-                        window.location.href = "{{ url_for('index') }}"; 
-                    } else {
-                        showAccessDenied(data.message); 
+            function showAccessDenied(message) {
+                document.getElementById('modalMessage').innerText = message;
+                modal.style.display = "block";
+            }
+
+            document.getElementById('partyButton').addEventListener('click', function() {
+                fetch('{{ url_for("check_role_access", role="party") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.access) {
+                            window.location.href = "{{ url_for('index') }}"; 
+                        } else {
+                            showAccessDenied(data.message); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            });
+
+            document.getElementById('legalButton').addEventListener('click', function() {
+                fetch('{{ url_for("check_role_access", role="legal") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.access) {
+                            window.location.href = "{{ url_for('index') }}"; 
+                        } else {
+                            showAccessDenied(data.message); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            });
+
+            document.getElementById('masterButton').addEventListener('click', function() {
+                fetch('{{ url_for("check_role_access", role="master") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.access) {
+                            window.location.href = "{{ url_for('index') }}"; 
+                        } else {
+                            showAccessDenied(data.message); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            });
+
+            document.getElementById('qcButton').addEventListener('click', function() {
+                fetch('{{ url_for("check_role_access", role="qc") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.access) {
+                            window.location.href = "{{ url_for('qc') }}"; 
+                        } else {
+                            showAccessDenied(data.message); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            });
+
+            document.getElementById('leadButton').addEventListener('click', function() {
+                fetch('{{ url_for("check_role_access", role="lead") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.access) {
+                            window.location.href = "{{ url_for('lead') }}"; 
+                        } else {
+                            showAccessDenied(data.message); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            });
+
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                document.getElementById('logoutConfirmation').style.display = 'flex';
+            });
+
+            document.getElementById('confirmLogoutButton').addEventListener('click', function() {
+                window.location.href = "{{ url_for('logout') }}";
+            });
+
+            document.getElementById('cancelLogoutButton').addEventListener('click', function() {
+                document.getElementById('logoutConfirmation').style.display = 'none';
+            });
+
+            // Menu icon functionality
+            window.toggleMenu = function() {
+                const dropdownContent = document.querySelector('.dropdown-content');
+                dropdownContent.classList.toggle('show');
+            }
+
+            window.onclick = function(event) {
+                if (!event.target.matches('.menuIcon') && !event.target.closest('.dropdown-content')) {
+                    var dropdowns = document.getElementsByClassName('dropdown-content');
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
                     }
-                });
-        });
-
-        document.getElementById('qcButton').addEventListener('click', function() {
-            fetch('{{ url_for("check_role_access", role="qc") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.access) {
-                        window.location.href = "{{ url_for('qc') }}"; 
-                    } else {
-                        showAccessDenied(data.message); 
-                    }
-                });
-        });
-
-        document.getElementById('leadButton').addEventListener('click', function() {
-            fetch('{{ url_for("check_role_access", role="lead") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.access) {
-                        window.location.href = "{{ url_for('lead') }}"; 
-                    } else {
-                        showAccessDenied(data.message); 
-                    }
-                });
+                }
+            };
         });
     </script>
 </body>

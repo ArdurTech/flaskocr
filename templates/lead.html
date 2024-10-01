@@ -10,12 +10,17 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username">{{ username }} ({{ role }})</span> <!-- Current role displayed here -->
         </div>
         <h4>Lead</h4>
         <div class="header-right">
+            <!-- Current time display -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
+            <!-- Menu icon -->
+            <div class="menuIcon" onClick="toggleMenu()">☰</div>
                 <div class="dropdown-content">
                     <button id="dataentryButton" class="dropdown-button">DataEntry</button>
                     <button id="qcButton" class="dropdown-button">QC</button>
@@ -25,6 +30,21 @@
             </div>
         </div>
     </header>
+    <!-- New Updates Submission Section -->
+    <div class="new-updates-section">
+        <button id="newUpdateButton">Write Update</button>
+    </div>
+
+    <!-- New Popup for Writing Updates -->
+    <div id="newUpdatePopupOverlay" class="custom-popup-overlay">
+        <div class="custom-popup-content">
+            <h3>Write New Update</h3>
+            <textarea id="updateTextArea" rows="5" placeholder="Write your update here..."></textarea>
+            <br>
+            <button id="submitUpdateButton" class="submit-update-button">Submit</button>
+            <button id="cancelUpdateButton" class="cancel-update-button">Cancel</button>
+        </div>
+    </div>
     <!-- Logout Confirmation Popup -->
     <div id="logoutConfirmation" class="popup-overlay">
         <div class="popup-content">
@@ -34,15 +54,55 @@
         </div>
     </div>
     <script>
+        // Show and hide new updates popup
+        document.getElementById('newUpdateButton').addEventListener('click', function() {
+            document.getElementById('newUpdatePopupOverlay').style.display = 'flex';
+        });
+
+        document.getElementById('cancelUpdateButton').addEventListener('click', function() {
+            document.getElementById('newUpdatePopupOverlay').style.display = 'none';
+        });
+
+        document.getElementById('submitUpdateButton').addEventListener('click', function() {
+            const updateText = document.getElementById('updateTextArea').value;
+            if (updateText) {
+                // Send the update to the backend via fetch or AJAX
+                fetch('/submit_update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ update: updateText })
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById('newUpdatePopupOverlay').style.display = 'none';
+                        alert('Update submitted successfully!');
+                    } else {
+                        alert('Error submitting update.');
+                    }
+                });
+            }
+        });
+
         // JavaScript for handling dropdown functionality
         document.querySelector('.dropdown').addEventListener('click', function() {
             this.querySelector('.dropdown-content').classList.toggle('show');
         });
 
+        // Fetch current time and update in the header without seconds
+        function showCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+            currentTimeElement.textContent = now.toLocaleTimeString([], options);
+        }
+        showCurrentTime();
+        setInterval(showCurrentTime, 1000); // Update time every second
+        
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            if (!event.target.matches('#username')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
+            if (!event.target.matches('.menuIcon') && !event.target.closest('.dropdown-content')) {
+                var dropdowns = document.getElementsByClassName('dropdown-content');
                 for (var i = 0; i < dropdowns.length; i++) {
                     var openDropdown = dropdowns[i];
                     if (openDropdown.classList.contains('show')) {

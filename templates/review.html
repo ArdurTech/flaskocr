@@ -10,12 +10,17 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username">{{ username }} ({{ role }})</span> <!-- Current role displayed here -->
         </div>
         <h4>DataEntry Report</h4>
         <div class="header-right">
+            <!-- Current time display -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
+            <!-- Menu icon -->
+            <div class="menuIcon" onClick="toggleMenu()">☰</div>
                 <div class="dropdown-content">
                     <button id="homeButton" class="dropdown-button">Home</button>
                     <button id="logoutButton" class="logout-button">Logout</button>
@@ -39,18 +44,43 @@
                 <tr>
                     <th>Sr No</th>
                     <th>Filename</th>
-                    <th>Input 1</th>
-                    <th>Input 2</th>
-                    <th>Input 3</th>
-                    <th>Input 4</th>
-                    <th>Input 5</th>
+                    {% if role == 'Party' %}
+                        <th>Grantor</th>
+                        <th>Grantee</th>
+                        <th>Comment</th>
+                    {% elif role == 'Legal' %}
+                        <th>Subdivision</th>
+                        <th>Plat Number</th>
+                        <th>Lot</th>
+                        <th>Block</th>
+                        <th>Section</th>
+                        <th>Abstract Name</th>
+                        <th>Abst Svy</th>
+                        <th>Acres</th>
+                        <th>Brief Legal</th>
+                        <th>Ref Docs</th>
+                    {% elif role == 'Master' %}
+                        <th>Book Type</th>
+                        <th>Instrument Type</th>
+                        <th>Remarks</th>
+                        <th>Inst No</th>
+                        <th>Case No</th>
+                        <th>Volume</th>
+                        <th>Page</th>
+                        <th>Instrument Date</th>
+                        <th>Filling Date</th>
+                        <th>Consideration</th>
+                        <th>User Comment</th>
+                        <th>Inst Type</th>
+                        <th>Record Type</th>
+                    {% endif %}
                     <th>DataEntry Time</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Data will be inserted here by JavaScript -->
             </tbody>
-        </table>
+        </table>        
     </div>
 
     <!-- Logout Confirmation Popup -->
@@ -63,68 +93,218 @@
     </div>
 
     <script>
-        // Fetch submissions based on the date
-        function fetchSubmissions(date) {
-            fetch('{{ url_for("get_submissions") }}' + (date ? '?date=' + date : ''))
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.querySelector('#submissionsTable tbody');
-                    tableBody.innerHTML = ''; // Clear any existing data
 
-                    if (data.submissions) {
-                        data.submissions.forEach((submission, index) => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${index + 1}</td>
-                                <td>${submission.filename}</td>
-                                <td>${submission.input1}</td>
-                                <td>${submission.input2}</td>
-                                <td>${submission.input3}</td>
-                                <td>${submission.input4}</td>
-                                <td>${submission.input5}</td>
-                                <td>${new Date(submission.created_time).toLocaleString()}</td>
-                            `;
-                            tableBody.appendChild(row);
-                        });
+const role = "{{ role }}"; // Get the role from the server
 
-                        // Update total count
-                        document.getElementById('totalCount').textContent = data.submissions.length;
-                    } else {
-                        tableBody.innerHTML = '<tr><td colspan="8">No submissions found for the selected date.</td></tr>';
-                        document.getElementById('totalCount').textContent = '0';
+function fetchSubmissions(date) {
+    console.log('Selected date:', date);
+    fetch('{{ url_for("get_submissions") }}' + (date ? '?date=' + date : ''))
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#submissionsTable tbody');
+            const tableHead = document.querySelector('#submissionsTable thead');
+            tableBody.innerHTML = ''; // Clear any existing data
+            tableHead.innerHTML = ''; // Clear table headers
+
+            // Define table headers based on role
+            let headers = `<tr><th>Sr No</th><th>Filename</th>`;
+
+            if (role === 'party') {
+                headers += `
+                    <th>Grantor</th>
+                    <th>Grantee</th>
+                    <th>Comment</th>`;
+            } else if (role === 'legal') {
+                headers += `
+                    <th>Subdivision</th>
+                    <th>Plat Num</th>
+                    <th>Lot</th>
+                    <th>Block</th>
+                    <th>Section</th>
+                    <th>Abstract Name</th>
+                    <th>Abstract Survey</th>
+                    <th>Acres</th>
+                    <th>Brief Legal</th>
+                    <th>Reference Documents</th>`;
+            } else if (role === 'master') {
+                headers += `
+                    <th>Book Type</th>
+                    <th>Instrument Type</th>
+                    <th>Remarks</th>
+                    <th>Instrument No</th>
+                    <th>Case No</th>
+                    <th>Volume</th>
+                    <th>Page</th>
+                    <th>Instrument Date</th>
+                    <th>Filing Date</th>
+                    <th>Consideration</th>
+                    <th>User Comment</th>
+                    <th>Instrument Type</th>
+                    <th>Record Type`;
+            } else if (role === 'qc' || role === 'lead') {
+                // Headers for qc and lead roles, as they can access all
+                headers += `
+                    <th>Source</th>
+                    <th>Grantor/Item</th>
+                    <th>Grantee/Info</th>
+                    <th>Comment/Remarks</th>
+                    <th>Subdivision</th>
+                    <th>Plat Num</th>
+                    <th>Lot</th>
+                    <th>Block</th>
+                    <th>Section</th>
+                    <th>Abstract Name</th>
+                    <th>Abstract Survey</th>
+                    <th>Acres</th>
+                    <th>Brief Legal</th>
+                    <th>Reference Documents</th>
+                    <th>Book Type</th>
+                    <th>Instrument Type</th>
+                    <th>Remarks</th>
+                    <th>Instrument No</th>
+                    <th>Case No</th>
+                    <th>Volume</th>
+                    <th>Page</th>
+                    <th>Instrument Date</th>
+                    <th>Filing Date</th>
+                    <th>Consideration</th>
+                    <th>User Comment</th>
+                    <th>Instrument Type</th>
+                    <th>Record Type`;
+            }
+
+            headers += `<th>Data Entry Time</th></tr>`;
+            tableHead.innerHTML = headers;
+
+            if (data.submissions && data.submissions.length > 0) {
+                data.submissions.forEach((submission, index) => {
+                    const row = document.createElement('tr');
+                    let rowContent = `
+                        <td>${index + 1}</td>
+                        <td>${submission.filename || ''}</td>`;
+
+                    if (role === 'party') {
+                        rowContent += `
+                            <td>${submission.grantor || ''}</td>
+                            <td>${submission.grantee || ''}</td>
+                            <td>${submission.comment || ''}</td>`;
+                    } else if (role === 'legal') {
+                        rowContent += `
+                            <td>${submission.subdivision || ''}</td>
+                            <td>${submission.platnum || ''}</td>
+                            <td>${submission.lot || ''}</td>
+                            <td>${submission.block || ''}</td>
+                            <td>${submission.section || ''}</td>
+                            <td>${submission.abstractName || ''}</td>
+                            <td>${submission.abstSvy || ''}</td>
+                            <td>${submission.acres || ''}</td>
+                            <td>${submission.briefLegal || ''}</td>
+                            <td>${submission.refDocs || ''}</td>`;
+                    } else if (role === 'master') {
+                        rowContent += `
+                            <td>${submission.bookType || ''}</td>
+                            <td>${submission.instrumentType || ''}</td>
+                            <td>${submission.remarks || ''}</td>
+                            <td>${submission.instNo || ''}</td>
+                            <td>${submission.caseNo || ''}</td>
+                            <td>${submission.volume || ''}</td>
+                            <td>${submission.page || ''}</td>
+                            <td>${submission.instrumentDate || ''}</td>
+                            <td>${submission.fillingDate || ''}</td>
+                            <td>${submission.consideration || ''}</td>
+                            <td>${submission.userComment || ''}</td>
+                            <td>${submission.instType || ''}</td>
+                            <td>${submission.recordType || ''}</td>`;
+                    } else if (role === 'qc' || role === 'lead') {
+                        // Show appropriate fields for qc and lead roles
+                        rowContent += `
+                            <td>${submission.source || ''}</td>
+                            <td>${submission.grantor || ''}</td>
+                            <td>${submission.grantee || ''}</td>
+                            <td>${submission.comment || ''}</td>
+                            <td>${submission.subdivision || ''}</td>
+                            <td>${submission.platnum || ''}</td>
+                            <td>${submission.lot || ''}</td>
+                            <td>${submission.block || ''}</td>
+                            <td>${submission.section || ''}</td>
+                            <td>${submission.abstractName || ''}</td>
+                            <td>${submission.abstSvy || ''}</td>
+                            <td>${submission.acres || ''}</td>
+                            <td>${submission.briefLegal || ''}</td>
+                            <td>${submission.refDocs || ''}</td>
+                            <td>${submission.bookType || ''}</td>
+                            <td>${submission.instrumentType || ''}</td>
+                            <td>${submission.remarks || ''}</td>
+                            <td>${submission.instNo || ''}</td>
+                            <td>${submission.caseNo || ''}</td>
+                            <td>${submission.volume || ''}</td>
+                            <td>${submission.page || ''}</td>
+                            <td>${submission.instrumentDate || ''}</td>
+                            <td>${submission.fillingDate || ''}</td>
+                            <td>${submission.consideration || ''}</td>
+                            <td>${submission.userComment || ''}</td>
+                            <td>${submission.instType || ''}</td>
+                            <td>${submission.recordType || ''}</td>`;
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching submissions:', error);
+
+                    // Add created_time to all roles
+                    rowContent += `<td>${new Date(submission.created_time).toLocaleString()}</td>`;
+                    row.innerHTML = rowContent;
+                    tableBody.appendChild(row);
                 });
-        }
 
-        // Initial fetch for today's submissions
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('dateFilterInput').value = today;
-        fetchSubmissions(today);
-
-        // Handle date change
-        document.getElementById('dateFilterInput').addEventListener('change', function() {
-            const selectedDate = this.value;
-            fetchSubmissions(selectedDate);
+                // Update total count
+                document.getElementById('totalCount').textContent = data.submissions.length;
+            } else {
+                // No data found case
+                tableBody.innerHTML = '<tr><td colspan="8">No submissions found for the selected date.</td></tr>';
+                document.getElementById('totalCount').textContent = '0';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching submissions:', error);
         });
+}
+
+
+    // Initial fetch for today's submissions or the selected date
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('dateFilterInput').value = today;
+fetchSubmissions(today); // Fetch submissions for today's date initially
+
+// Handle date change
+document.getElementById('dateFilterInput').addEventListener('change', function() {
+    const selectedDate = this.value;
+    fetchSubmissions(selectedDate); // Fetch submissions for the selected date
+
+});
 
         // JavaScript for handling dropdown functionality
         document.querySelector('.dropdown').addEventListener('click', function() {
             this.querySelector('.dropdown-content').classList.toggle('show');
         });
 
+        // Fetch current time and update in the header without seconds
+        function showCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+            currentTimeElement.textContent = now.toLocaleTimeString([], options);
+        }
+        showCurrentTime();
+        setInterval(showCurrentTime, 1000); // Update time every second
+
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            if (!event.target.matches('#username')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
+            if (!event.target.matches('.menuIcon') && !event.target.closest('.dropdown-content')) {
+                var dropdowns = document.getElementsByClassName('dropdown-content');
                 for (var i = 0; i < dropdowns.length; i++) {
                     var openDropdown = dropdowns[i];
                     if (openDropdown.classList.contains('show')) {
                         openDropdown.classList.remove('show');
                     }
                 }
+                
             }
         };
 

@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Final Reports</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='lead.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='finalreports.css') }}">
     <style>
-        /* Add this CSS to style the circular button and dropdown */
         #downloadDropdown {
             position: fixed;
             bottom: 20px;
@@ -61,13 +60,18 @@
     <header>
         <div class="header-left">
             <img src="{{ url_for('static', filename='logo/ardurtech.png') }}" alt="Ardur Technologies" id="companyLogo">
+            <span class="vertical-pipe">|</span>
+            <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
+            <span id="username">{{ username }} ({{ role }})</span> <!-- Current role displayed here -->
         </div>
         <h4>Final Reports</h4>
         <div class="header-right">
+            <!-- Current time display -->
+            <span id="currentTime" class="current-time"></span>
             <div class="dropdown">
-                <img src="{{ url_for('static', filename='logo/user.png') }}" alt="User Icon" id="userIcon">
-                <span id="username">{{ username }}</span>
-                <div class="dropdown-content">
+            <!-- Menu icon -->
+            <div class="menuIcon" onClick="toggleMenu()">☰</div>
+               <div class="dropdown-content">
                     <button id="leadButton" class="dropdown-button">Lead</button>
                     <button id="logoutButton" class="logout-button">Logout</button>
                 </div>
@@ -147,14 +151,24 @@
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         });
 
+        // Fetch current time and update in the header without seconds
+        function showCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit' }; // Exclude seconds
+            currentTimeElement.textContent = now.toLocaleTimeString([], options);
+        }
+        showCurrentTime();
+        setInterval(showCurrentTime, 1000); // Update time every second
+
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            if (!event.target.matches('#dropdownButton')) {
-                var dropdowns = document.getElementsByClassName('dropdownMenu');
+            if (!event.target.matches('.menuIcon') && !event.target.closest('.dropdown-content')) {
+                var dropdowns = document.getElementsByClassName('dropdown-content');
                 for (var i = 0; i < dropdowns.length; i++) {
                     var openDropdown = dropdowns[i];
-                    if (openDropdown.style.display === 'block') {
-                        openDropdown.style.display = 'none';
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
                     }
                 }
             }

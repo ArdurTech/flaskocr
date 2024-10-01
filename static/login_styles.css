@@ -9,7 +9,7 @@
 /* Login Page Styles */
 body {
     font-family: Arial, sans-serif;
-    background: url('../static/logo/back.jpg') no-repeat center center fixed; 
+    background: url('../static/logo/img1.jpg') no-repeat center center fixed; 
     background-size: cover; /* Ensure the image covers the entire background */
     display: flex;
     justify-content: center;
@@ -65,7 +65,7 @@ body {
 .login-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* Center all items horizontally */
     background: rgba(255, 255, 255, 0); /* Slightly opaque background for better readability */
     padding: 20px;
     border-radius: 10px;
@@ -84,10 +84,11 @@ body {
     border-radius: 10px;
     margin-bottom: 20px;
     font-size: 16px;
-    background: linear-gradient(145deg, #e0dcdc, #bdbde9ce); /* Subtle gradient for 3D effect */
-    color: #0e0000;
+    background: linear-gradient(145deg, #ffffff, #fcfcfc); /* Subtle gradient for 3D effect */
+    color: #000000;
     opacity: 0.7; /* Less opacity for placeholder */
     transition: opacity 0.3s ease;
+    text-align: center; /* Ensure text is centered */
     box-shadow: 0 0 8px rgb(0, 0, 3);
 }
 
@@ -112,16 +113,18 @@ body {
 }
 
 .login-container button {
-    padding: 10px 10px;
-    width: 100%;
+    padding: 10px 20px; /* Adjust padding as needed */
+    width: 80%; /* Set the width to a percentage or fixed value */
+    max-width: 200px; /* Set a max width if necessary */
     border: none;
     border-radius: 10px;
-    background: linear-gradient(145deg, #af7abd, #042183a8); /* Subtle gradient for 3D effect */
+    background: linear-gradient(145deg, #0d520d, #b1420e); /* Subtle gradient for 3D effect */
     font-size: 16px;
     color: #ffffff;
     cursor: pointer;
     box-shadow: 0 4px 8px rgb(0, 0, 0);
     transition: background 0.3s ease, transform 0.3s ease;
+    margin: 0 95px; /* Center the button */
 }
 
 .login-container button:hover {
