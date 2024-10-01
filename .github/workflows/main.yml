@@ -45,7 +45,7 @@ jobs:
           aws elasticbeanstalk create-application-version \
             --application-name titleindexing \
             --version-label ${{ github.sha }} \
-            --source-bundle S3Bucket=ardur,S3Key=deploy.zip \
+            --source-bundle S3Bucket=ardurtech,S3Key=deploy.zip \
             --region ${{ env.AWS_REGION }}
           aws elasticbeanstalk update-environment \
             --application-name titleindexing \
