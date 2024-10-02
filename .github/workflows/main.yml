@@ -29,8 +29,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/ardurflask:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/ardurflask:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ardur:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/ardur:latest
 
       - name: Install AWS CLI
         run: |
@@ -43,12 +43,12 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name titleindexing \
+            --application-name title \
             --version-label ${{ github.sha }} \
             --source-bundle S3Bucket=ardurtech,S3Key=deploy.zip \
             --region ${{ env.AWS_REGION }}
           aws elasticbeanstalk update-environment \
-            --application-name titleindexing \
-            --environment-name Titleindexing-env \
+            --application-name title \
+            --environment-name Title-env \
             --version-label ${{ github.sha }} \
             --region ${{ env.AWS_REGION }}

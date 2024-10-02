@@ -30,7 +30,8 @@ RUN pip install --no-cache-dir \
     pytesseract==0.3.10 \
     bcrypt==4.2.0 \
     reportlab==4.2.2 \
-    pandas==2.2.3 
+    urllib3==1.26.19 \
+    pandas==2.2.2 
     
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
