@@ -1,7 +1,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "adityapurohit3110/ardurflask:latest",
+    "Name": "bharti153/ardurflask:latest",
     "Update": "true"
   },
   "Ports": [
