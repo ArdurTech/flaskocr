@@ -1,7 +1,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "bharti153/ardurflask:latest",
+    "Name": "adityapurohit3110/ardurflask:latest",
     "Update": "true"
   },
   "Ports": [
@@ -21,7 +21,7 @@
     },
     {
       "Name": "DATABASE_URL",
-      "Value": "mysql://admin:Ardur311012@database-1.czew08qiqixz.ap-south-1.rds.amazonaws.com:3306/ocr_database"
+      "Value": "mysql://ardurdev:LAo1#qs6hsP}@68.178.227.55:3306/ardurtechnology"
     },
     {
       "Name": "SECRET_KEY",
