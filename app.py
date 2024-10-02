@@ -35,10 +35,10 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # MySQL configurations
-app.config['MYSQL_HOST'] = 'database-1.ctcmiaowwjkv.us-east-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = 'Admin3110'
-app.config['MYSQL_DB'] = 'ocr'
+app.config['MYSQL_HOST'] = '68.178.227.55'
+app.config['MYSQL_USER'] = 'ardurdev'
+app.config['MYSQL_PASSWORD'] = 'LAo1#qs6hsP}'
+app.config['MYSQL_DB'] = 'ardurtechnology'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # app.config['MYSQL_SSL_CA'] = 'cert/DigiCertGlobalRootCA.crt.pem'
 
