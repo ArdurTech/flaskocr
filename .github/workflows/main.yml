@@ -3,7 +3,7 @@ name: Deploy to Elastic Beanstalk
 on:
   push:
     branches:
-      - main  # Change this to the branch you want to trigger the deployment on
+      - main
 
 jobs:
   deploy:
